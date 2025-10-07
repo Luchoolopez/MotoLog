@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../config/database";
 
-export interface MotoAttributes {
+export interface MotorcycleAttributes {
   id: number;
   name: string;
   brand: string;
@@ -11,10 +11,10 @@ export interface MotoAttributes {
   created_at?: Date;
 }
 
-export type MotoCreationAttributes = Optional<MotoAttributes, "id" | "created_at">;
+export type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, "id" | "created_at">;
 
-export class Moto extends Model<MotoAttributes, MotoCreationAttributes>
-  implements MotoAttributes {
+export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAttributes>
+  implements MotorcycleAttributes {
   public id!: number;
   public name!: string;
   public brand!: string;
@@ -24,7 +24,7 @@ export class Moto extends Model<MotoAttributes, MotoCreationAttributes>
   public created_at!: Date;
 }
 
-Moto.init(
+Motorcycle.init(
   {
     id: {
       type: DataTypes.INTEGER,

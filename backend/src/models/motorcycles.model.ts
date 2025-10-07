@@ -60,7 +60,7 @@ Motorcycle.init(
   {
     sequelize,
     tableName: "motorcycles",
-    modelName: "Moto",
+    modelName: "Motorcycle",
     timestamps: false,
   }
 );

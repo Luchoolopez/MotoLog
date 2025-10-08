@@ -25,7 +25,7 @@
     "@types/sequelize": "^4.28.20",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
+    "express": "^4.19.2",
     "mysql2": "^3.15.1",
     "sequelize": "^6.37.7",
     "zod": "^4.1.12"

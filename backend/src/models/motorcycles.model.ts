@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from "sequelize";
-import { sequelize } from "../config/database";
+import { DataTypes, Model, Optional } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface MotorcycleAttributes {
   id: number;
@@ -11,23 +11,22 @@ export interface MotorcycleAttributes {
   created_at?: Date;
 }
 
-export type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, "id" | "created_at">;
+export type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, 'id' | 'current_km' | 'created_at'>;
 
-export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAttributes>
-  implements MotorcycleAttributes {
+export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAttributes> implements MotorcycleAttributes {
   public id!: number;
   public name!: string;
   public brand!: string;
   public model!: string;
   public year!: number;
   public current_km!: number;
-  public created_at!: Date;
+  public readonly created_at!: Date;
 }
 
 Motorcycle.init(
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,
     },
@@ -45,22 +44,20 @@ Motorcycle.init(
     },
     year: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     current_km: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      defaultValue: 0,
     },
     created_at: {
       type: DataTypes.DATE,
-      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
   },
   {
     sequelize,
-    tableName: "motorcycles",
-    modelName: "Motorcycle",
+    tableName: 'motorcycles',
     timestamps: false,
   }
 );

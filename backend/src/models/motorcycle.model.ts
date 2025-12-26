@@ -1,6 +1,5 @@
 import { DataTypes, Optional, Model } from "sequelize";
 import { sequelize } from "../config/database";
-import { allowsEval } from "zod/v4/core/util.cjs";
 
 interface MotorcycleAttributes {
     id: number;
@@ -10,12 +9,12 @@ interface MotorcycleAttributes {
     patente: string;
     km_actual: number;
     fecha_compra: Date;
-    plan_id: number;
-    createdAt: Date;
-    updatedAt: Date;
+    plan_id: number | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 };
 
-type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, 'createdAt' | 'updatedAt'>;
+type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, 'id' | 'createdAt' | 'updatedAt' | 'km_actual' | 'plan_id'>;
 
 export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAttributes>
     implements MotorcycleAttributes {
@@ -26,7 +25,7 @@ export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAt
     public patente!: string;
     public km_actual!: number;
     public fecha_compra!: Date;
-    public plan_id!: number;
+    public plan_id!: number | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 };
@@ -56,7 +55,8 @@ Motorcycle.init(
         },
         km_actual:{
             type:DataTypes.INTEGER,
-            allowNull:false
+            allowNull:false,
+            defaultValue:0
         },
         fecha_compra:{
             type:DataTypes.DATE,
@@ -64,15 +64,7 @@ Motorcycle.init(
         },
         plan_id:{
             type:DataTypes.INTEGER,
-            allowNull:false
-        },
-        createdAt:{
-            type:DataTypes.DATE,
-            defaultValue:DataTypes.NOW
-        },
-        updatedAt:{
-            type:DataTypes.DATE,
-            defaultValue:DataTypes.NOW
+            allowNull:true
         }
     },
     {

@@ -1,24 +1,45 @@
-INSERT INTO maintenances (item, description, notes) VALUES
-('Spark Plug','Bujía','Inspect and Replace according to intervals'),
-('Exhaust Gas Control Valve Cable','Cable de la válvula de control de gases','Inspect every 25,600 km'),
-('Drive Chain','Cadena de transmisión','Inspect and lubricate every 800 km'),
-('Brake Fluid','Líquido de frenos','Replace every 2 years (note 3)');
+CREATE TABLE planes_mantenimiento (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
--- ahora intervals
--- Spark plug
-INSERT INTO maintenance_intervals (maintenance_id, action, interval_km, note) VALUES
-((SELECT id FROM maintenances WHERE item='Spark Plug'), 'I', 25600, 'Inspect'),
-((SELECT id FROM maintenances WHERE item='Spark Plug'), 'R', 51200, 'Replace');
+CREATE TABLE items_plan (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    plan_id INT NOT NULL,
+    tarea VARCHAR(150) NOT NULL,
+    intervalo_km INT NOT NULL,
+    intervalo_meses INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (plan_id) REFERENCES planes_mantenimiento(id) ON DELETE CASCADE
+);
 
--- Exhaust gas control valve cable
-INSERT INTO maintenance_intervals (maintenance_id, action, interval_km, note) VALUES
-((SELECT id FROM maintenances WHERE item='Exhaust Gas Control Valve Cable'), 'I', 25600, 'Inspect');
+CREATE TABLE motos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    marca VARCHAR(50) NOT NULL,
+    modelo VARCHAR(50) NOT NULL,
+    anio INT,
+    patente VARCHAR(20),
+    km_actual INT NOT NULL DEFAULT 0,
+    fecha_compra DATE,
+    plan_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (plan_id) REFERENCES planes_mantenimiento(id) ON DELETE SET NULL
+);
 
--- Drive chain
-INSERT INTO maintenance_intervals (maintenance_id, action, interval_km, note) VALUES
-((SELECT id FROM maintenances WHERE item='Drive Chain'), 'I', 800, 'Inspect'),
-((SELECT id FROM maintenances WHERE item='Drive Chain'), 'L', 800, 'Lubricate');
-
--- Brake fluid (por tiempo)
-INSERT INTO maintenance_intervals (maintenance_id, action, interval_months, note) VALUES
-((SELECT id FROM maintenances WHERE item='Brake Fluid'), 'R', 24, 'Replace every 2 years (or when indicated)');
+CREATE TABLE historial_mantenimiento (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    moto_id INT NOT NULL,
+    item_plan_id INT NOT NULL,
+    fecha_realizado DATE NOT NULL,
+    km_realizado INT NOT NULL,
+    observaciones TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (moto_id) REFERENCES motos(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_plan_id) REFERENCES items_plan(id) ON DELETE CASCADE
+);

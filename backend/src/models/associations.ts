@@ -4,7 +4,7 @@ import { ItemsPlan } from "./items_plan.model";
 import { Motorcycle } from "./motorcycle.model";
 
 
-export const defineAssociations = () => {
+export const setupAssociations = () => {
 
     // --- 1. Plan <-> Items (Uno a Muchos) ---
     // Un Plan tiene muchos Items

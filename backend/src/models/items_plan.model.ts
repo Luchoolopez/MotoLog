@@ -7,8 +7,8 @@ interface itemsPlanAttributes {
     tarea: string;
     intervalo_km: number;
     intervalo_meses: number;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 type itemsPlanCreationAttributes = Optional<itemsPlanAttributes, 'id' | 'updatedAt' | 'createdAt'>;
@@ -33,7 +33,6 @@ ItemsPlan.init(
         },
         plan_id: {
             type: DataTypes.INTEGER,
-            autoIncrement: true,
             allowNull: false
         },
         tarea: {
@@ -48,14 +47,6 @@ ItemsPlan.init(
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        createdAt: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
-        updatedAt: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        }
     },
     {
         sequelize,

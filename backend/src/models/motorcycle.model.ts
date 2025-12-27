@@ -1,6 +1,9 @@
 import { DataTypes, Optional, Model } from "sequelize";
 import { sequelize } from "../config/database";
 
+import { MaintenancePlan } from "./maintenance_plan.model";
+import { MaintenanceHistory } from "./maintenance_history.model";
+
 interface MotorcycleAttributes {
     id: number;
     marca: string;
@@ -14,7 +17,7 @@ interface MotorcycleAttributes {
     updatedAt?: Date;
 };
 
-type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, 'id' | 'createdAt' | 'updatedAt' | 'km_actual' | 'plan_id'>;
+export type MotorcycleCreationAttributes = Optional<MotorcycleAttributes, 'id' | 'createdAt' | 'updatedAt' | 'km_actual' | 'plan_id'>;
 
 export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAttributes>
     implements MotorcycleAttributes {
@@ -28,6 +31,10 @@ export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAt
     public plan_id!: number | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+
+    //asociaciones
+    public plan_mantenimiento?:MaintenancePlan;
+    public historial?:MaintenanceHistory[];
 };
 
 Motorcycle.init(

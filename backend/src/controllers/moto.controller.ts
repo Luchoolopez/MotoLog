@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { MotoService } from "../services/moto.service";
 
-export class motoController {
+export class MotoController {
     private motoService: MotoService;
 
     constructor() {
@@ -75,6 +75,36 @@ export class motoController {
                 success: false,
                 message: 'Error a la hora de encontrar la moto',
                 error: error.message
+            })
+        }
+    }
+
+    update = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            if (!id || isNaN(Number(id))) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ID invalido'
+                })
+            }
+            const updated = await this.motoService.updateMoto(Number(id), req.body);
+            return res.status(200).json({
+                success:true,
+                message:'Moto actualizada correctamente',
+                data:updated
+            })
+        } catch (error:any) {
+            if(error.message.includes('no encontrado')){
+                return res.status(404).json({
+                    success:false,
+                    message:'Moto no encontrado'
+                })
+            }
+            return res.status(500).json({
+                success:false,
+                message:'Error a la hora de actualizar la moto',
+                error:error.message
             })
         }
     }

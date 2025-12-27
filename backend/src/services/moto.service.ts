@@ -39,9 +39,10 @@ export class MotoService {
     async updateMileage(id:number, newKm:number){
         const moto = await this.getMotoById(id);
 
+        /*
         if(newKm < moto.km_actual){
-            throw new Error('El nuevo kilometraje no puede ser menor al actual');
-        }
+            console.warn('El nuevo kilometraje no puede ser menor al actual');
+        }*/
 
         moto.km_actual = newKm;
         await moto.save();

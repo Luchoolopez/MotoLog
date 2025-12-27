@@ -41,8 +41,13 @@ export class MaintenanceCalculatorService {
             return [];
         }
 
+        const historial = await MaintenanceHistory.findAll({
+            where:{moto_id:motoId},
+            attributes:['item_plan_id', 'fecha_realizado', 'km_realizado'],
+            raw:true
+        });
+
         const items = moto.plan_mantenimiento.items;
-        const historial = moto.historial || [];
         const resultados: MaintenanceStatus[] = [];
 
         for (const item of items) {
@@ -91,7 +96,7 @@ export class MaintenanceCalculatorService {
                 item_id: item.id,
                 tarea: item.tarea || 'tarea sin nombre',
                 estado: estado,
-                km_limite:targetKm,
+                km_limite: targetKm,
                 km_restantes: kmRestantes,
                 fecha_limite: targetFecha.toISOString().split('T')[0] || "", // Formato YYYY-MM-DD
                 dias_restantes: diasRestantes

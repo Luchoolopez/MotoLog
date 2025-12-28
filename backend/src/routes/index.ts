@@ -1,22 +1,16 @@
-//con este archivo no hace falta exportar cada ruta individualmente al server.ts
 import { Router } from "express";
-import { readdirSync } from "fs";
+import MotoRoutes from "./moto";
+import PlanRoutes from "./plan";
+import ItemRoutes from "./item";
+import HistoryRoutes from "./history";
+import CalculatorRoutes from "./calculator";
 
-const PATH_ROUTER = `${__dirname}`;
 const router = Router();
 
-const cleanFileName = (fileName:string) => {
-    const file = fileName.split('.').shift();
-    return file;
-}
+router.use('/motos', MotoRoutes);
+router.use('/planes', PlanRoutes);
+router.use('/items', ItemRoutes);
+router.use('/historial', HistoryRoutes);
+router.use('/status', CalculatorRoutes);
 
-readdirSync(PATH_ROUTER).filter((fileName) => {
-    const cleanName = cleanFileName(fileName);
-    if(cleanName !== 'index'){
-        import(`./${cleanName}`).then((moduleRouter) => {
-            router.use(`/${cleanName}`, moduleRouter.Router)
-        })
-    }
-})
-
-export { router }
+export default router;

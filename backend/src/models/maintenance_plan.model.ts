@@ -5,19 +5,15 @@ interface MaintenancePlanAttributes {
     id: number;
     nombre: string;
     descripcion: string;
-    createdAt: Date;
-    updatedAt: Date;
 };
 
-type MaintenancePlanCreationAttributes = Optional<MaintenancePlanAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+type MaintenancePlanCreationAttributes = Optional<MaintenancePlanAttributes, 'id'>;
 
 export class MaintenancePlan extends Model<MaintenancePlanAttributes, MaintenancePlanCreationAttributes>
     implements MaintenancePlanAttributes {
     public id!: number;
     public nombre!: string;
     public descripcion!: string;
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
 }
 
 MaintenancePlan.init(
@@ -35,14 +31,6 @@ MaintenancePlan.init(
             type: DataTypes.STRING,
             allowNull: true
         },
-        createdAt: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
-        updatedAt: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        }
     },
     {
         sequelize,

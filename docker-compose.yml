@@ -4,26 +4,25 @@ services:
   db:
     image: mysql:8.0
     container_name: motolog_db
-    restart: always
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql 
       - ./db/sql:/docker-entrypoint-initdb.d
     networks:
       - motolog-network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       timeout: 20s
       retries: 10
       start_period: 40s
 
-  # Backend
   backend:
     build: ./backend
     container_name: motolog_backend
@@ -32,22 +31,27 @@ services:
       - "${BACKEND_PORT}:3000"
     environment:
       - NODE_ENV=development
-      - PORT=3000
-      - DB_HOST=db
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
+      # Configuración de DB (Mapeamos las vars de MYSQL aquí)
+      - DB_HOST=db  # "db" es el nombre del servicio de arriba
       - DB_PORT=3306
-    depends_on:
-      db:
-        condition: service_healthy
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      # Configuración para Hot-Reload (Igual a Barbershop)
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=100
     volumes:
       - ./backend:/app
       - /app/node_modules
+    # Comando para iniciar en modo desarrollo
+    command: npm run dev
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - motolog-network
 
-  # Frontend (mantener igual)
   frontend:
     build: ./frontend
     container_name: motolog_frontend
@@ -59,6 +63,10 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:${BACKEND_PORT}
+      # Hot-Reload para frontend también
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=100
+    command: npm run dev -- --host 0.0.0.0
     depends_on:
       - backend
     networks:
@@ -66,7 +74,6 @@ services:
 
 volumes:
   mysql_data:
-
 
 networks:
   motolog-network:

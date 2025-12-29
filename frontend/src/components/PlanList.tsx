@@ -1,28 +1,11 @@
-import { useEffect, useState } from 'react';
-import type { MaintenancePlan } from '../types/maintenancePlan';
-import { PlanService } from '../services/planService.service';
+import { usePlanes } from "../hooks/useMaintenancePlan";
+import { useState } from "react";
+import { PlanFormModal } from "./modal/planes/PlanFormModal";
 
 export const PlanList = () => {
-    const [planes, setPlanes] = useState<MaintenancePlan[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const { planes, loading, error, removePlan, refreshPlanes } = usePlanes();
 
-    useEffect(() => {
-        fetchPlanes();
-    }, []);
-
-    const fetchPlanes = async () => {
-        try {
-            setLoading(true);
-            const data = await PlanService.getAll();
-            setPlanes(data);
-        } catch (err) {
-            setError('Error al cargar los planes. Asegúrate que el backend esté corriendo.');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [showModal, setShowModal] = useState(false);
 
     if (loading) return <div className="container mt-4">Cargando planes...</div>;
     if (error) return <div className="container mt-4 alert alert-danger">{error}</div>;
@@ -31,14 +14,16 @@ export const PlanList = () => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Planes de Mantenimiento</h2>
-                <button className="btn btn-primary">
+                <button
+                    className="btn btn-primary"
+                    onClick={() => setShowModal(true)}>
                     + Nuevo Plan
                 </button>
             </div>
 
             {planes.length === 0 ? (
                 <div className="alert alert-info">
-                    No hay planes creados todavía. ¡Crea el primero!
+                    No hay planes creados todavía.
                 </div>
             ) : (
                 <div className="row">
@@ -52,18 +37,17 @@ export const PlanList = () => {
                                     </p>
                                 </div>
                                 <div className="card-footer bg-transparent border-top-0 d-flex justify-content-end gap-2">
-                                    <button 
+                                    <button
                                         className="btn btn-outline-secondary btn-sm"
-                                        onClick={() => console.log('Ver items del plan', plan.id)}
+                                        onClick={() => console.log('Ver items', plan.id)}
                                     >
                                         Ver Items
                                     </button>
-                                    <button 
+                                    <button
                                         className="btn btn-danger btn-sm"
                                         onClick={async () => {
-                                            if(confirm('¿Borrar plan?')) {
-                                                await PlanService.delete(plan.id);
-                                                fetchPlanes();
+                                            if (confirm('¿Borrar plan?')) {
+                                                await removePlan(plan.id);
                                             }
                                         }}
                                     >
@@ -75,6 +59,13 @@ export const PlanList = () => {
                     ))}
                 </div>
             )}
+            <PlanFormModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                onSuccess={() => {
+                    refreshPlanes();
+                }}
+            />
         </div>
     );
 };

@@ -27,6 +27,6 @@ export interface CreateMotoDto {
     modelo: string;
     patente: string;
     km_actual: number;
-    fecha_compra: string;
+    fecha_compra: string | undefined;
     plan_id: number;
 }

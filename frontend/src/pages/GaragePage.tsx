@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useMotos } from '../hooks/useMoto';
+import { MotoFormModal } from '../components/modal/planes/MotoFormModal';
+import { useState } from 'react';
 
 export const GaragePage = () => {
-    const { motos, loading, error, removeMoto } = useMotos();
+    const { motos, loading, error, removeMoto, addMoto } = useMotos();
+    const [showModal, setShowModal] = useState<boolean>(false); 
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center vh-100">
@@ -28,7 +31,9 @@ export const GaragePage = () => {
                     <Link to="/planes" className="btn btn-outline-secondary me-2" title="Configurar Planes">
                         Planes
                     </Link>
-                    <button className="btn btn-primary">
+                    <button 
+                    className="btn btn-primary"
+                    onClick={() => setShowModal(true)}>
                         + Nueva Moto
                     </button>
                 </div>
@@ -43,7 +48,7 @@ export const GaragePage = () => {
                 <div className="row">
                     {motos.map(moto => (
                         <div key={moto.id} className="col-md-6 col-lg-4 mb-4">
-                            <div className="card shadow-sm h-100 border-0">
+                            <div className="card h-100 border-3">
                                 <div className="card-header bg-dark text-white text-center py-3">
                                     <h4 className="card-title mb-0">{moto.marca} {moto.modelo}</h4>
                                 </div>
@@ -86,6 +91,11 @@ export const GaragePage = () => {
                     ))}
                 </div>
             )}
+            <MotoFormModal
+            show={showModal}
+            onClose={() => setShowModal(false)}
+            onSubmit={addMoto}
+            />
         </div>
     );
 };

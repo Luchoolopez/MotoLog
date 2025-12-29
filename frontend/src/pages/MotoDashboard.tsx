@@ -36,7 +36,6 @@ export const MotoDashboard = () => {
 
     return (
         <div className="container mt-4">
-            {/* Cabecera de la Moto */}
             <div className="card bg-dark text-white mb-4 shadow">
                 <div className="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -55,10 +54,8 @@ export const MotoDashboard = () => {
 
             <h4 className="mb-3">Estado de Mantenimiento</h4>
             
-            {/* Lista de Alertas (Semáforo) */}
             <div className="list-group shadow-sm">
                 {statuses.map((item) => {
-                    // Lógica visual según estado
                     let icon = '🟢';
                     let borderClass = 'border-start border-5 border-success';
                     let bgClass = '';
@@ -97,7 +94,6 @@ export const MotoDashboard = () => {
                                     </div>
                                 </div>
                                 
-                                {/* Botón de Acción */}
                                 {item.estado !== 'OK' && (
                                     <button 
                                         className={`btn btn-sm fw-bold ${item.estado === 'VENCIDO' ? 'btn-danger' : 'btn-warning'}`}

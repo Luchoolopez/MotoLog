@@ -2,6 +2,7 @@ export interface Motorcycle{
     id:number;
     marca:string;
     modelo:string;
+    anio:number;
     patente:string;
     km_actual:number;
     plan_id:number;
@@ -25,6 +26,7 @@ export interface MaintenanceStatus {
 export interface CreateMotoDto {
     marca: string;
     modelo: string;
+    anio:number;
     patente: string;
     km_actual: number;
     fecha_compra: string | undefined;

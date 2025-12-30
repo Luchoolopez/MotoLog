@@ -1,9 +1,11 @@
 import { usePlanes } from "../hooks/useMaintenancePlan";
 import { useState } from "react";
 import { PlanFormModal } from "./modal/planes/PlanFormModal";
+import { useNavigate } from "react-router-dom";
 
 export const PlanList = () => {
     const { planes, loading, error, removePlan, refreshPlanes } = usePlanes();
+    const navigate = useNavigate();
 
     const [showModal, setShowModal] = useState(false);
 
@@ -39,7 +41,7 @@ export const PlanList = () => {
                                 <div className="card-footer bg-transparent border-top-0 d-flex justify-content-end gap-2">
                                     <button
                                         className="btn btn-outline-secondary btn-sm"
-                                        onClick={() => console.log('Ver items', plan.id)}
+                                        onClick={() => navigate(`/planes/${plan.id}/items`)}
                                     >
                                         Ver Items
                                     </button>

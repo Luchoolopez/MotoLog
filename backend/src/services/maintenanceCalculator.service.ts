@@ -62,12 +62,15 @@ export class MaintenanceCalculatorService {
             const ultimoService = mantenimientoItem[0];
 
             //definir un punto de partida, si nunca lo hizo, la base es la compra de la moto (0km y fecha compra)
-            let baseKm = 0;
-            let baseFecha = new Date(moto.fecha_compra);
+            let baseKm:number;
+            let baseFecha:Date;
 
             if (ultimoService) {
                 baseKm = ultimoService.km_realizado;
                 baseFecha = new Date(ultimoService.fecha_realizado);
+            }else{
+                baseKm = 0;
+                baseFecha = new Date(moto.fecha_compra);
             }
 
             const targetKm = baseKm + item.intervalo_km;

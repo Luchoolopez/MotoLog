@@ -27,6 +27,11 @@ export const MotoService = {
         return response.data.data;
     },
 
+    updateMileage:async(id:number, newKm:number):Promise<Motorcycle> => {
+        const response = await apiClient.put(`/motos/km/${id}`, {newKm});
+        return response.data.data;
+    },
+
     delete:async(id:number):Promise<void> => {
         const response = await apiClient.delete(`/motos/${id}`);
         return response.data.data;

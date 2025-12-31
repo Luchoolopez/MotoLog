@@ -1,5 +1,4 @@
 import { Motorcycle, MotorcycleCreationAttributes } from "../models/motorcycle.model";
-import { MaintenancePlan } from "../models/maintenance_plan.model";
 import { createMotorcycleType, updateMotorcycleType } from "../validations/motorcycle.schema";
 
 export class MotoService {
@@ -13,52 +12,42 @@ export class MotoService {
     }
 
     async getAll() {
-        return await Motorcycle.findAll({
-            include: [
-                {
-                    model: MaintenancePlan,
-                    as: 'plan_mantenimiento',
-                    attributes: ['nombre']
-                }
-            ]
-        });
+        return await Motorcycle.findAll();
     }
 
-    async getMotoById(id:number){
-        const moto = await Motorcycle.findByPk(id, {
-            include:[
-                {model:MaintenancePlan, as:'plan_mantenimiento'}
-            ]
-        });
-        if(!moto){
+    async getMotoById(id: number) {
+        const moto = await Motorcycle.findByPk(id);
+        if (!moto) {
             throw new Error('Moto no encontrada');
         }
         return moto;
     }
 
-    async updateMileage(id:number, newKm:number){
+    async updateMileage(id: number, newKm: number) {
         const moto = await this.getMotoById(id);
 
-        /*
+        if (newKm < 0) {
+            throw new Error('El nuevo kilometraje no puede ser menor a 0');
+        }
         if(newKm < moto.km_actual){
-            console.warn('El nuevo kilometraje no puede ser menor al actual');
-        }*/
+            throw new Error('El nuevo kilometraje no puede ser menor al actual');
+        }
 
         moto.km_actual = newKm;
         await moto.save();
         return moto;
     }
 
-    async updateMoto(id:number, data:updateMotorcycleType){
+    async updateMoto(id: number, data: updateMotorcycleType) {
         const moto = await this.getMotoById(id);
         await moto.update(data as any);
         return moto;
     }
 
     //capaz lo tenga q desactivar mejor mas q borrar 
-    async deleteMoto(id:number){
+    async deleteMoto(id: number) {
         const moto = await this.getMotoById(id);
         await moto.destroy();
-        return {message:'Moto eliminada correctamente'};
+        return { message: 'Moto eliminada correctamente' };
     }
 }

@@ -112,7 +112,7 @@ export class MotoController {
     updateMileage = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const { km_actual } = req.body;
+            const { newKm } = req.body;
             if (!id || isNaN(Number(id))) {
                 return res.status(400).json({
                     success: false,
@@ -120,17 +120,17 @@ export class MotoController {
                 })
             }
 
-            if (km_actual === undefined || isNaN(Number(km_actual))) {
+            if (newKm === undefined || isNaN(Number(newKm))) {
                 return res.status(400).json({
                     success: false,
-                    message: 'El Km_actual es requerido y debe ser un numero'
+                    message: 'El nuevo kilometraje es requerido y debe ser un numero'
                 })
             }
-            const updatedMoto = await this.motoService.updateMoto(Number(id), km_actual);
+            const updatedMileage = await this.motoService.updateMileage(Number(id), Number(newKm));
             return res.status(200).json({
                 success: true,
                 message: 'Kilometraje actualizado exitosamente',
-                data: updatedMoto
+                data: updatedMileage
             })
         } catch (error: any) {
             return res.status(500).json({

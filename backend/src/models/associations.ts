@@ -2,6 +2,7 @@ import { MaintenancePlan } from "./maintenance_plan.model";
 import { MaintenanceHistory } from "./maintenance_history.model";
 import { ItemsPlan } from "./items_plan.model";
 import { Motorcycle } from "./motorcycle.model";
+import { User } from "./user.model";
 
 
 export const setupAssociations = () => {
@@ -55,6 +56,19 @@ export const setupAssociations = () => {
     MaintenanceHistory.belongsTo(ItemsPlan, {
         foreignKey: 'item_plan_id',
         as: 'detalle_tarea'
+    });
+
+
+    // --- 5. User <-> Motos (Uno a Muchos) ---
+    // Un User tiene muchas Motos
+    User.hasMany(Motorcycle, {
+        foreignKey: 'user_id',
+        as: 'motos'
+    });
+    // Una Moto pertenece a un User
+    Motorcycle.belongsTo(User, {
+        foreignKey: 'user_id',
+        as: 'usuario'
     });
 
 };

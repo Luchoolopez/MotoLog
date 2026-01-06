@@ -54,9 +54,11 @@ export class MaintenanceCalculatorService {
             //filtra por id de item y ordena para obtener el mas reciente
             const mantenimientoItem = historial.filter((h: any) => h.item_plan_id === item.id);
 
-            //ordena por fecha descendente
+            //ordena por fecha descendente, luego por km descendente
             mantenimientoItem.sort((a: any, b: any) => {
-                return new Date(b.fecha_realizado).getTime() - new Date(a.fecha_realizado).getTime();
+                const fechaDiff = new Date(b.fecha_realizado).getTime() - new Date(a.fecha_realizado).getTime();
+                if (fechaDiff !== 0) return fechaDiff;
+                return b.km_realizado - a.km_realizado;
             });
 
             const ultimoService = mantenimientoItem[0];

@@ -11,14 +11,22 @@ export class MotoService {
         }
     }
 
-    async getAll() {
-        return await Motorcycle.findAll();
+    async getAllByUser(userId: number) {
+        return await Motorcycle.findAll({ where: { user_id: userId } });
     }
 
     async getMotoById(id: number) {
         const moto = await Motorcycle.findByPk(id);
         if (!moto) {
             throw new Error('Moto no encontrada');
+        }
+        return moto;
+    }
+
+    async getMotoByIdAndUser(id: number, userId: number) {
+        const moto = await Motorcycle.findOne({ where: { id, user_id: userId } });
+        if (!moto) {
+            throw new Error('Moto no encontrada o no pertenece al usuario');
         }
         return moto;
     }

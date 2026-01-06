@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 
 import { MaintenancePlan } from "./maintenance_plan.model";
 import { MaintenanceHistory } from "./maintenance_history.model";
+import { User } from "./user.model";
 
 interface MotorcycleAttributes {
     id: number;
@@ -13,6 +14,7 @@ interface MotorcycleAttributes {
     km_actual: number;
     fecha_compra: Date;
     plan_id: number | null;
+    user_id: number;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -29,12 +31,14 @@ export class Motorcycle extends Model<MotorcycleAttributes, MotorcycleCreationAt
     public km_actual!: number;
     public fecha_compra!: Date;
     public plan_id!: number | null;
+    public user_id!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
     //asociaciones
     public plan_mantenimiento?:MaintenancePlan;
     public historial?:MaintenanceHistory[];
+    public usuario?:User;
 };
 
 Motorcycle.init(
@@ -72,6 +76,10 @@ Motorcycle.init(
         plan_id:{
             type:DataTypes.INTEGER,
             allowNull:true
+        },
+        user_id:{
+            type:DataTypes.INTEGER,
+            allowNull:false
         }
     },
     {
@@ -80,7 +88,9 @@ Motorcycle.init(
         modelName: 'motorcycle',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        paranoid: true, // soft delete
+        deletedAt: 'deleted_at'
     }
 )
 

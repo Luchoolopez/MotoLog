@@ -8,7 +8,7 @@ export const createMotorcycleSchema = z.object({
     km_actual:z.number().int().nonnegative().optional(),
     fecha_compra:z.coerce.date({
         message:'Formato de fecha invalido (YYYY-MM-DD)'
-    }),
+    }).max(new Date(), {message: 'La fecha de compra no puede ser futura'}),
     plan_id:z.number().int().positive().optional()
 });
 

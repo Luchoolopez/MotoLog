@@ -27,8 +27,8 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('user');
 
 
-            if (window.location.pathname !== '/iniciar-sesion') {
-                window.location.href = '/iniciar-sesion';
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
             }
         }
         return Promise.reject(error);

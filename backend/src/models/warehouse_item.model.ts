@@ -12,12 +12,13 @@ interface WarehouseItemAttributes {
     lugar_compra: string | null;
     cantidad: number;
     stock_actual: number;
+    modelo_moto: string | null;
     observaciones: string | null;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-export type WarehouseItemCreationAttributes = Optional<WarehouseItemAttributes, 'id' | 'createdAt' | 'updatedAt' | 'nro_parte' | 'lugar_compra' | 'observaciones' | 'stock_actual'>;
+export type WarehouseItemCreationAttributes = Optional<WarehouseItemAttributes, 'id' | 'createdAt' | 'updatedAt' | 'nro_parte' | 'lugar_compra' | 'observaciones' | 'stock_actual' | 'modelo_moto'>;
 
 export class WarehouseItem extends Model<WarehouseItemAttributes, WarehouseItemCreationAttributes>
     implements WarehouseItemAttributes {
@@ -31,6 +32,7 @@ export class WarehouseItem extends Model<WarehouseItemAttributes, WarehouseItemC
     public lugar_compra!: string | null;
     public cantidad!: number;
     public stock_actual!: number;
+    public modelo_moto!: string | null;
     public observaciones!: string | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
@@ -81,6 +83,10 @@ WarehouseItem.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
+        },
+        modelo_moto: {
+            type: DataTypes.STRING,
+            allowNull: true
         },
         observaciones: {
             type: DataTypes.TEXT,

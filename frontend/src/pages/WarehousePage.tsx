@@ -122,6 +122,7 @@ const WarehousePage = () => {
                         <thead className="table-light">
                             <tr>
                                 <th>Item / Nomenclatura</th>
+                                <th>Modelo</th>
                                 <th>Categoría</th>
                                 <th>Nro Parte</th>
                                 <th>Fecha</th>
@@ -138,6 +139,9 @@ const WarehousePage = () => {
                                         <small className="text-muted d-block" style={{ maxWidth: '200px' }}>
                                             {item.lugar_compra ? `🛒 ${item.lugar_compra}` : ''}
                                         </small>
+                                    </td>
+                                    <td>
+                                        <span className="text-muted small">{item.modelo_moto || '-'}</span>
                                     </td>
                                     <td>
                                         <span className={`badge rounded-pill ${item.categoria === 'Repuesto' ? 'bg-primary' :

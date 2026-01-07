@@ -84,9 +84,6 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
                                             <h2 className="mb-0">{avgConsumption && avgConsumption.litersPer100Km > 0 ? `${avgConsumption.litersPer100Km.toFixed(2)} L/100km` : '---'}</h2>
                                         </div>
                                     </div>
-                                    <div className="col-12 text-center mt-1">
-                                        <small className="text-muted">Calculado entre la primera y última carga con km registrado</small>
-                                    </div>
                                 </div>
 
                                 {history.length === 0 ? (

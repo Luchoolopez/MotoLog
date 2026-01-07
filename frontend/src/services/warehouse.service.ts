@@ -11,6 +11,7 @@ export interface WarehouseItem {
     lugar_compra: string | null;
     cantidad: number;
     stock_actual: number;
+    modelo_moto: string | null;
     observaciones: string | null;
     createdAt: string;
     updatedAt: string;
@@ -24,6 +25,7 @@ export interface CreateWarehouseItemDto {
     precio_compra: number;
     lugar_compra?: string;
     cantidad: number;
+    modelo_moto?: string;
     observaciones?: string;
 }
 

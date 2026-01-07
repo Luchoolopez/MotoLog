@@ -18,6 +18,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
         cantidad: 1,
         nro_parte: '',
         lugar_compra: '',
+        modelo_moto: '',
         observaciones: ''
     });
 
@@ -35,6 +36,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                     cantidad: initialData.cantidad,
                     nro_parte: initialData.nro_parte || '',
                     lugar_compra: initialData.lugar_compra || '',
+                    modelo_moto: initialData.modelo_moto || '',
                     observaciones: initialData.observaciones || ''
                 });
             } else {
@@ -46,6 +48,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                     cantidad: 1,
                     nro_parte: '',
                     lugar_compra: '',
+                    modelo_moto: '',
                     observaciones: ''
                 });
             }
@@ -161,6 +164,15 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         value={formData.lugar_compra}
                                         onChange={e => setFormData({ ...formData, lugar_compra: e.target.value })}
                                         placeholder="Ej: Mercado Libre, Local..."
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Modelo Moto</label>
+                                    <input
+                                        type="text" className="form-control"
+                                        value={formData.modelo_moto}
+                                        onChange={e => setFormData({ ...formData, modelo_moto: e.target.value })}
+                                        placeholder="Ej: MT-03, FZ-25..."
                                     />
                                 </div>
 

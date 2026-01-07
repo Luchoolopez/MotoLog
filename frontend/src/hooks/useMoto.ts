@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { MotoService } from "../services/moto.service";
 import { PlanService } from "../services/planService.service"; // Importamos esto aquí
 import type { Motorcycle, CreateMotoDto } from "../types/moto.types";
+import { useToast } from "../context/ToastContext";
 
 export const useMotos = () => {
     const [motos, setMotos] = useState<Motorcycle[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const fetchMotos = useCallback(async () => {
         try {
@@ -22,13 +24,13 @@ export const useMotos = () => {
         }
     }, []);
 
-    const addMoto = async (formData: { 
-        marca: string, 
-        modelo: string, 
-        anio:number,
-        patente: string, 
-        km_actual: number, 
-        fecha_compra: string 
+    const addMoto = async (formData: {
+        marca: string,
+        modelo: string,
+        anio: number,
+        patente: string,
+        km_actual: number,
+        fecha_compra: string
     }) => {
         try {
             setLoading(true);
@@ -41,22 +43,23 @@ export const useMotos = () => {
             const nuevaMotoData: CreateMotoDto = {
                 marca: formData.marca,
                 modelo: formData.modelo,
-                anio:formData.anio,
+                anio: formData.anio,
                 patente: formData.patente,
                 km_actual: Number(formData.km_actual),
-                fecha_compra: formData.fecha_compra ? formData.fecha_compra : undefined, 
+                fecha_compra: formData.fecha_compra ? formData.fecha_compra : undefined,
                 plan_id: nuevoPlan.id
             };
 
             const motoCreada = await MotoService.create(nuevaMotoData);
 
             setMotos(prev => [...prev, motoCreada]);
-            
-            return true; 
+
+            return true;
         } catch (error: any) {
             console.error(error);
-            alert('Error al crear moto: ' + (error.response?.data?.message || error.message));
-            return false; 
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message;
+            showToast('Error al crear moto: ' + msg, 'error');
+            return false;
         } finally {
             setLoading(false);
         }
@@ -68,7 +71,7 @@ export const useMotos = () => {
             setMotos(prevMotos => prevMotos.filter(moto => moto.id !== id));
             return true;
         } catch (error: any) {
-            alert('Error al eliminar: ' + (error.message || 'Desconocido'));
+            showToast('Error al eliminar: ' + (error.message || 'Desconocido'), 'error');
             return false;
         }
     };
@@ -83,7 +86,7 @@ export const useMotos = () => {
         motos,
         loading,
         error,
-        addMoto,     
+        addMoto,
         removeMoto,
         refreshMotos: fetchMotos
     };

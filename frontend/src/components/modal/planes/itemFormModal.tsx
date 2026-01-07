@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useToast } from "../../../context/ToastContext";
 import type { CreateItemDto } from "../../../types/item.types";
 
 interface Props {
@@ -6,23 +7,25 @@ interface Props {
     onClose: () => void;
     planId: number;
     onSubmit: (data: CreateItemDto) => Promise<boolean>;
-    onSuccess: () => void; 
+    onSuccess: () => void;
 }
 
 export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Props) => {
     const [formData, setFormData] = useState({
         tarea: '',
-        intervalo_km: 3000,
-        intervalo_meses: 6
+        intervalo_km: 0 as string | number,
+        intervalo_meses: 0 as string | number
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { showToast } = useToast();
 
     if (!show) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        if (!formData.tarea.trim()) return alert("La tarea es obligatoria");
+
+        if (!formData.tarea.trim()) return showToast("La tarea es obligatoria", 'warning');
 
         setIsSubmitting(true);
 
@@ -34,11 +37,11 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         };
 
         const success = await onSubmit(newItem);
-        
+
         setIsSubmitting(false);
 
         if (success) {
-            setFormData({ tarea: '', intervalo_km: 3000, intervalo_meses: 6 });
+            setFormData({ tarea: '', intervalo_km: 0, intervalo_meses: 0 });
             onSuccess();
             onClose();
         }
@@ -47,7 +50,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
     return (
         <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
+                <div className="modal-content" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(5px)' }}>
                     <div className="modal-header">
                         <h5 className="modal-title">Nueva Regla de Mantenimiento</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
@@ -56,30 +59,38 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                         <div className="modal-body">
                             <div className="mb-3">
                                 <label className="form-label">Tarea</label>
-                                <input 
-                                    type="text" className="form-control" 
+                                <input
+                                    type="text" className="form-control"
                                     placeholder="Ej: Cambio de Aceite"
                                     value={formData.tarea}
-                                    onChange={e => setFormData({...formData, tarea: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, tarea: e.target.value })}
                                     autoFocus required
                                 />
                             </div>
                             <div className="row">
                                 <div className="col-6 mb-3">
                                     <label className="form-label">Intervalo KM</label>
-                                    <input 
-                                        type="number" className="form-control" 
+                                    <input
+                                        type="number" className="form-control"
+                                        min="0"
                                         value={formData.intervalo_km}
-                                        onChange={e => setFormData({...formData, intervalo_km: Number(e.target.value)})}
+                                        onChange={e => setFormData({
+                                            ...formData,
+                                            intervalo_km: e.target.value === '' ? '' : Number(e.target.value)
+                                        })}
                                         required
                                     />
                                 </div>
                                 <div className="col-6 mb-3">
                                     <label className="form-label">Intervalo Meses</label>
-                                    <input 
-                                        type="number" className="form-control" 
+                                    <input
+                                        type="number" className="form-control"
+                                        min="0"
                                         value={formData.intervalo_meses}
-                                        onChange={e => setFormData({...formData, intervalo_meses: Number(e.target.value)})}
+                                        onChange={e => setFormData({
+                                            ...formData,
+                                            intervalo_meses: e.target.value === '' ? '' : Number(e.target.value)
+                                        })}
                                         required
                                     />
                                 </div>

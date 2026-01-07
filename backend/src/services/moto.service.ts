@@ -1,4 +1,6 @@
 import { Motorcycle, MotorcycleCreationAttributes } from "../models/motorcycle.model";
+import { MaintenancePlan } from "../models/maintenance_plan.model";
+import { ItemsPlan } from "../models/items_plan.model";
 import { createMotorcycleType, updateMotorcycleType } from "../validations/motorcycle.schema";
 
 export class MotoService {
@@ -12,7 +14,16 @@ export class MotoService {
     }
 
     async getAllByUser(userId: number) {
-        return await Motorcycle.findAll({ where: { user_id: userId } });
+        return await Motorcycle.findAll({
+            where: { user_id: userId },
+            include: [
+                {
+                    model: MaintenancePlan,
+                    as: 'plan_mantenimiento',
+                    include: [{ model: ItemsPlan, as: 'items' }]
+                }
+            ]
+        });
     }
 
     async getMotoById(id: number) {
@@ -37,9 +48,7 @@ export class MotoService {
         if (newKm < 0) {
             throw new Error('El nuevo kilometraje no puede ser menor a 0');
         }
-        if(newKm < moto.km_actual){
-            throw new Error('El nuevo kilometraje no puede ser menor al actual');
-        }
+        // Removed validation to allow corrections: if (newKm < moto.km_actual)
 
         moto.km_actual = newKm;
         await moto.save();

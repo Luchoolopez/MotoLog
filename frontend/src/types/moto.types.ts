@@ -1,13 +1,14 @@
-export interface Motorcycle{
-    id:number;
-    marca:string;
-    modelo:string;
-    anio:number;
-    patente:string;
-    km_actual:number;
-    plan_id:number;
-    plan_mantenimiento?:{
-        nombre:string;
+export interface Motorcycle {
+    id: number;
+    marca: string;
+    modelo: string;
+    anio: number;
+    patente: string;
+    km_actual: number;
+    plan_id: number;
+    plan_mantenimiento?: {
+        nombre: string;
+        items?: any[]; // We can be more specific if needed, but any[] or {length: number} is enough for now
     }
 }
 
@@ -26,7 +27,7 @@ export interface MaintenanceStatus {
 export interface CreateMotoDto {
     marca: string;
     modelo: string;
-    anio:number;
+    anio: number;
     patente: string;
     km_actual: number;
     fecha_compra: string | undefined;

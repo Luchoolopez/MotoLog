@@ -22,17 +22,12 @@ export const MotoService = {
         return response.data.data;
     },
 
-    updateKm: async (id: number, km: number): Promise<Motorcycle> => {
-        const response = await apiClient.put(`/motos/km/${id}`, { km_actual: km });
+    updateMileage: async (id: number, newKm: number, date?: string): Promise<Motorcycle> => {
+        const response = await apiClient.put(`/motos/km/${id}`, { newKm, date });
         return response.data.data;
     },
 
-    updateMileage:async(id:number, newKm:number):Promise<Motorcycle> => {
-        const response = await apiClient.put(`/motos/km/${id}`, {newKm});
-        return response.data.data;
-    },
-
-    delete:async(id:number):Promise<void> => {
+    delete: async (id: number): Promise<void> => {
         const response = await apiClient.delete(`/motos/${id}`);
         return response.data.data;
     }

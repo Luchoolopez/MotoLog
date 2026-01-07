@@ -42,9 +42,9 @@ export class MaintenanceCalculatorService {
         }
 
         const historial = await MaintenanceHistory.findAll({
-            where:{moto_id:motoId},
-            attributes:['item_plan_id', 'fecha_realizado', 'km_realizado'],
-            raw:true
+            where: { moto_id: motoId },
+            attributes: ['item_plan_id', 'fecha_realizado', 'km_realizado'],
+            raw: true
         });
 
         const items = moto.plan_mantenimiento.items;
@@ -52,7 +52,11 @@ export class MaintenanceCalculatorService {
 
         for (const item of items) {
             //filtra por id de item y ordena para obtener el mas reciente
-            const mantenimientoItem = historial.filter((h: any) => h.item_plan_id === item.id);
+            const mantenimientoItem = historial.filter((h: any) => {
+                // Debug log for filtering
+                // console.log(`Checking Item ID ${item.id} vs History Item ID ${h.item_plan_id}`);
+                return Number(h.item_plan_id) === Number(item.id);
+            });
 
             //ordena por fecha descendente, luego por km descendente
             mantenimientoItem.sort((a: any, b: any) => {
@@ -63,14 +67,17 @@ export class MaintenanceCalculatorService {
 
             const ultimoService = mantenimientoItem[0];
 
+            console.log(`[Calculator] Task: ${item.tarea} (ID: ${item.id})`);
+            console.log(`[Calculator] Last Service Found:`, ultimoService ? `KM: ${ultimoService.km_realizado} / Date: ${ultimoService.fecha_realizado}` : 'NONE');
+
             //definir un punto de partida, si nunca lo hizo, la base es la compra de la moto (0km y fecha compra)
-            let baseKm:number;
-            let baseFecha:Date;
+            let baseKm: number;
+            let baseFecha: Date;
 
             if (ultimoService) {
                 baseKm = ultimoService.km_realizado;
                 baseFecha = new Date(ultimoService.fecha_realizado);
-            }else{
+            } else {
                 baseKm = 0;
                 baseFecha = new Date(moto.fecha_compra);
             }

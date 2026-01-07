@@ -4,21 +4,27 @@ import { MotoService } from '../services/moto.service';
 import type { MaintenanceStatus, Motorcycle } from '../types/moto.types';
 import { ItemFormModal } from '../components/modal/planes/itemFormModal';
 import { UpdateKmModal } from '../components/modal/planes/updateKmModal';
+import { RegisterServiceModal } from '../components/modal/planes/RegisterServiceModal';
+import { MaintenanceHistoryService, type CreateHistoryDto } from '../services/maintenanceHistory.service';
 import { useItems } from '../hooks/useItem';
+import { useToast } from '../context/ToastContext';
 
 export const MotoDashboard = () => {
     const { id } = useParams();
     const motoId = Number(id);
+    const { showToast } = useToast();
 
     const { addItem, deleteItem } = useItems();
 
     const [moto, setMoto] = useState<Motorcycle | null>(null);
     const [statuses, setStatuses] = useState<MaintenanceStatus[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Estados para los modales
     const [showItemModal, setShowItemModal] = useState(false);
     const [showKmModal, setShowKmModal] = useState(false); // Estado para modal de KM
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [selectedItemForService, setSelectedItemForService] = useState<{ id: number, task: string } | null>(null);
 
     const fetchDashboard = async () => {
         try {
@@ -40,6 +46,19 @@ export const MotoDashboard = () => {
         fetchDashboard();
     }, [motoId]);
 
+    const handleRegisterService = async (data: CreateHistoryDto) => {
+        try {
+            await MaintenanceHistoryService.create(data);
+            showToast('Servicio registrado con éxito', 'success');
+            return true;
+        } catch (error: any) {
+            console.error(error);
+            const msg = error.response?.data?.message || error.message;
+            showToast('Error al registrar servicio: ' + msg, 'error');
+            return false;
+        }
+    };
+
     if (loading || !moto) return <div className="p-5 text-center">Analizando moto... 🔧</div>;
 
     return (
@@ -53,7 +72,7 @@ export const MotoDashboard = () => {
                     </div>
                     <div className="text-end">
                         <div className="display-6">{moto.km_actual.toLocaleString()} km</div>
-                        <button 
+                        <button
                             className="btn btn-sm btn-outline-light mt-2"
                             onClick={() => setShowKmModal(true)} // Abrir modal KM
                         >
@@ -69,7 +88,7 @@ export const MotoDashboard = () => {
                     + Agregar Regla
                 </button>
             </div>
-            
+
             <div className="list-group shadow-sm">
                 {statuses.length === 0 && (
                     <div className="alert alert-info text-center">
@@ -82,18 +101,21 @@ export const MotoDashboard = () => {
                     let icon = '🟢';
                     let borderClass = 'border-start border-5 border-success';
                     let bgClass = '';
-                    let btnText = 'Ver Detalle';
-                    
+                    let btnText = 'Registrar';
+                    let btnClass = 'btn-outline-primary';
+
                     if (item.estado === 'ALERTA') {
                         icon = '🟡';
                         borderClass = 'border-start border-5 border-warning';
                         bgClass = 'bg-warning bg-opacity-10';
                         btnText = 'Registrar Pronto';
+                        btnClass = 'btn-warning';
                     } else if (item.estado === 'VENCIDO') {
                         icon = '🔴';
                         borderClass = 'border-start border-5 border-danger';
                         bgClass = 'bg-danger bg-opacity-10';
                         btnText = '¡REGISTRAR YA!';
+                        btnClass = 'btn-danger';
                     }
 
                     return (
@@ -105,33 +127,46 @@ export const MotoDashboard = () => {
                                     </h5>
                                     <div className="text-muted small mt-1">
                                         {item.estado === 'OK' ? (
-                                            <span>Te quedan <strong>{item.km_restantes} km</strong></span>
+                                            <span>
+                                                Te quedan <strong>{item.km_restantes} km</strong>
+                                                {item.dias_restantes > 0 && <span> o <strong>{item.dias_restantes} días</strong></span>}
+                                            </span>
                                         ) : (
                                             <span className="text-danger fw-bold">
                                                 {/* Aquí corregimos visualmente si el backend manda negativo */}
-                                                {item.km_restantes < 0 
-                                                    ? `Te pasaste por ${Math.abs(item.km_restantes)} km!` 
-                                                    : `Faltan ${item.km_restantes} km.`}
+                                                {item.km_restantes < 0
+                                                    ? `¡Te pasaste por ${Math.abs(item.km_restantes)} km!`
+                                                    : item.dias_restantes < 0
+                                                        ? `¡Vencido hace ${Math.abs(item.dias_restantes)} día${Math.abs(item.dias_restantes) === 1 ? '' : 's'}!`
+                                                        : `Faltan ${item.km_restantes} km.`}
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 <div className="d-flex gap-2 align-items-center">
-                                     <button className="btn btn-outline-danger btn-sm"
+                                    <button className="btn btn-outline-danger btn-sm"
                                         onClick={async () => {
-                                            if(confirm('¿Borrar regla?')) {
+                                            // Using standard confirm as placeholder, ideally use toast/modal but specific request was just replace alerts
+                                            // keeping this simple for now or using the confirm replacement if requested later.
+                                            // The user hasn't complained about this confirm specifically yet.
+                                            if (confirm('¿Borrar regla?')) {
                                                 await deleteItem(item.item_id);
                                                 fetchDashboard();
                                             }
                                         }}>
                                         🗑️
                                     </button>
-                                    {item.estado !== 'OK' && (
-                                        <button className={`btn btn-sm fw-bold ${item.estado === 'VENCIDO' ? 'btn-danger' : 'btn-warning'}`}>
-                                            {btnText}
-                                        </button>
-                                    )}
+
+                                    <button
+                                        className={`btn btn-sm fw-bold ${btnClass}`}
+                                        onClick={() => {
+                                            setSelectedItemForService({ id: item.item_id, task: item.tarea });
+                                            setShowRegisterModal(true);
+                                        }}
+                                    >
+                                        {btnText}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -154,8 +189,22 @@ export const MotoDashboard = () => {
                 onClose={() => setShowKmModal(false)}
                 motoId={moto.id}
                 currentKm={moto.km_actual}
-                onSuccess={() => fetchDashboard()} 
+                onSuccess={() => fetchDashboard()}
             />
+
+            {/* MODAL CHECK (Service) */}
+            {selectedItemForService && (
+                <RegisterServiceModal
+                    show={showRegisterModal}
+                    onClose={() => setShowRegisterModal(false)}
+                    motoId={moto.id}
+                    itemId={selectedItemForService.id}
+                    taskName={selectedItemForService.task}
+                    currentKm={moto.km_actual}
+                    onSubmit={handleRegisterService}
+                    onSuccess={() => fetchDashboard()}
+                />
+            )}
         </div>
     );
 };

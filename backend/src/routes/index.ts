@@ -5,6 +5,9 @@ import PlanRoutes from "./plan";
 import ItemRoutes from "./item";
 import HistoryRoutes from "./history";
 import CalculatorRoutes from "./calculator";
+import OdometerHistoryRoutes from "./odometerHistory.routes";
+import FuelRoutes from "./fuel";
+import warehouseRoutes from './warehouse';
 
 const router = Router();
 
@@ -14,5 +17,8 @@ router.use('/planes', PlanRoutes);
 router.use('/items', ItemRoutes);
 router.use('/historial', HistoryRoutes);
 router.use('/status', CalculatorRoutes);
+router.use('/odometer-history', OdometerHistoryRoutes);
+router.use('/fuel', FuelRoutes);
+router.use('/warehouse', warehouseRoutes);
 
 export default router;

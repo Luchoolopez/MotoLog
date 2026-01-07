@@ -5,6 +5,7 @@ import { MotoDashboard } from '../pages/MotoDashboard';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ProtectedRoute from '../components/ProtectedRoute';
+import WarehousePage from '../pages/WarehousePage';
 
 export function AppRouter() {
     return (
@@ -20,6 +21,11 @@ export function AppRouter() {
                 <Route path='/motos/:id' element={
                     <ProtectedRoute>
                         <MotoDashboard />
+                    </ProtectedRoute>
+                } />
+                <Route path='/warehouse' element={
+                    <ProtectedRoute>
+                        <WarehousePage />
                     </ProtectedRoute>
                 } />
             </Route>

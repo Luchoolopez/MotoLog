@@ -84,23 +84,30 @@ export class MaintenanceCalculatorService {
 
             const targetKm = baseKm + item.intervalo_km;
 
-            const targetFecha = new Date(baseFecha);
-            targetFecha.setMonth(targetFecha.getMonth() + item.intervalo_meses);
-
             const kmRestantes = targetKm - moto.km_actual;
 
-            const hoy = new Date();
-            const diferenciaTiempo = targetFecha.getTime() - hoy.getTime();
-            //convertir milisegundos a dias
-            const diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24));
+            let diasRestantes = 9999; // Default huge number if no date limit
+            let targetFecha = new Date(baseFecha); // Init with base
+
+            // Calculate Date limit only if interval > 0
+            if (item.intervalo_meses > 0) {
+                targetFecha.setMonth(targetFecha.getMonth() + item.intervalo_meses);
+                const hoy = new Date();
+                const diferenciaTiempo = targetFecha.getTime() - hoy.getTime();
+                diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24));
+            }
 
             let estado: 'OK' | 'ALERTA' | 'VENCIDO' = 'OK';
 
-            //vencido: si te pasaste de km o fecha
-            //alerta: si te faltan menos de 500km o menos de 30 dias
-            if (kmRestantes < 0 || diasRestantes < 0) {
+            //vencido: si te pasaste de km o fecha (si aplica)
+            //alerta: si te faltan menos de 500km o menos de 30 dias (si aplica)
+
+            const daysWarning = item.intervalo_meses > 0 ? diasRestantes < 30 : false;
+            const daysExpired = item.intervalo_meses > 0 ? diasRestantes < 0 : false;
+
+            if (kmRestantes < 0 || daysExpired) {
                 estado = 'VENCIDO';
-            } else if (kmRestantes < 500 || diasRestantes < 30) {
+            } else if (kmRestantes < 500 || daysWarning) {
                 estado = 'ALERTA'
             }
 

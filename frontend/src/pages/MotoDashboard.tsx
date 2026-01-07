@@ -5,7 +5,12 @@ import type { MaintenanceStatus, Motorcycle } from '../types/moto.types';
 import { ItemFormModal } from '../components/modal/planes/itemFormModal';
 import { UpdateKmModal } from '../components/modal/planes/updateKmModal';
 import { RegisterServiceModal } from '../components/modal/planes/RegisterServiceModal';
+import { HistoryListModal } from '../components/modal/planes/HistoryListModal';
+import { OdometerHistoryModal } from '../components/modal/planes/OdometerHistoryModal';
+import { FuelFormModal } from '../components/modal/planes/FuelFormModal';
+import { FuelHistoryModal } from '../components/modal/planes/FuelHistoryModal';
 import { MaintenanceHistoryService, type CreateHistoryDto } from '../services/maintenanceHistory.service';
+import { FuelService, type FuelHistoryResponse } from '../services/fuel.service';
 import { useItems } from '../hooks/useItem';
 import { useToast } from '../context/ToastContext';
 
@@ -24,17 +29,26 @@ export const MotoDashboard = () => {
     const [showItemModal, setShowItemModal] = useState(false);
     const [showKmModal, setShowKmModal] = useState(false); // Estado para modal de KM
     const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [showOdometerHistoryModal, setShowOdometerHistoryModal] = useState(false);
+    const [showFuelFormModal, setShowFuelFormModal] = useState(false);
+    const [showFuelHistoryModal, setShowFuelHistoryModal] = useState(false);
+    const [averageConsumption, setAverageConsumption] = useState<FuelHistoryResponse['averageConsumption'] | null>(null);
+
     const [selectedItemForService, setSelectedItemForService] = useState<{ id: number, task: string } | null>(null);
+    const [selectedItemForHistory, setSelectedItemForHistory] = useState<{ id: number, task: string } | null>(null);
 
     const fetchDashboard = async () => {
         try {
             // setLoading(true); // Opcional: comentar para que no parpadee al actualizar solo KM
-            const [motoData, statusData] = await Promise.all([
+            const [motoData, statusData, fuelData] = await Promise.all([
                 MotoService.getById(motoId),
-                MotoService.getStatus(motoId)
+                MotoService.getStatus(motoId),
+                FuelService.getByMotoId(motoId)
             ]);
             setMoto(motoData);
             setStatuses(statusData);
+            setAverageConsumption(fuelData.averageConsumption);
         } catch (error) {
             console.error("Error cargando dashboard", error);
         } finally {
@@ -68,25 +82,49 @@ export const MotoDashboard = () => {
                     <div>
                         <Link to="/" className="text-white-50 text-decoration-none mb-1 d-block">← Volver al Garage</Link>
                         <h2 className="mb-0">{moto.marca} {moto.modelo}</h2>
-                        <span className="badge bg-light text-dark mt-2">{moto.patente}</span>
+                        <div className="d-flex align-items-center gap-2 mt-2">
+                            <span className="badge bg-light text-dark">{moto.patente}</span>
+                            {averageConsumption !== null && (
+                                <span className="badge bg-success" title={`Consumo: ${averageConsumption.kmPerLiter.toFixed(2)} km/l | ${averageConsumption.litersPer100Km.toFixed(2)} L/100km`}>
+                                    ⛽ {averageConsumption.kmPerLiter.toFixed(1)} km/l | {averageConsumption.litersPer100Km.toFixed(1)} L/100km
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="text-end">
                         <div className="display-6">{moto.km_actual.toLocaleString()} km</div>
-                        <button
-                            className="btn btn-sm btn-outline-light mt-2"
-                            onClick={() => setShowKmModal(true)} // Abrir modal KM
-                        >
-                            ✏️ Actualizar Km
-                        </button>
+                        <div className="d-flex gap-2 justify-content-end mt-2">
+                            <button
+                                className="btn btn-sm btn-outline-light"
+                                onClick={() => setShowOdometerHistoryModal(true)}
+                                title="Ver historial de kilómetros"
+                            >
+                                🕓 Historial
+                            </button>
+                            <button
+                                className="btn btn-sm btn-light"
+                                onClick={() => setShowKmModal(true)} // Abrir modal KM
+                            >
+                                ✏️ Actualizar Km
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h4 className="mb-0">Estado de Mantenimiento</h4>
-                <button className="btn btn-primary btn-sm" onClick={() => setShowItemModal(true)}>
-                    + Agregar Regla
-                </button>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-outline-success btn-sm" onClick={() => setShowFuelHistoryModal(true)}>
+                        ⛽ Historial Combustible
+                    </button>
+                    <button className="btn btn-success btn-sm" onClick={() => setShowFuelFormModal(true)}>
+                        + Cargar Nafta
+                    </button>
+                    <button className="btn btn-primary btn-sm" onClick={() => setShowItemModal(true)}>
+                        + Agregar Tarea
+                    </button>
+                </div>
             </div>
 
             <div className="list-group shadow-sm">
@@ -129,14 +167,17 @@ export const MotoDashboard = () => {
                                         {item.estado === 'OK' ? (
                                             <span>
                                                 Te quedan <strong>{item.km_restantes} km</strong>
-                                                {item.dias_restantes > 0 && <span> o <strong>{item.dias_restantes} días</strong></span>}
+                                                {/* Hidden if dias_restantes is basically infinity (9999) */}
+                                                {item.dias_restantes < 3650 && item.dias_restantes > 0 && (
+                                                    <span> o <strong>{item.dias_restantes} días</strong></span>
+                                                )}
                                             </span>
                                         ) : (
                                             <span className="text-danger fw-bold">
-                                                {/* Aquí corregimos visualmente si el backend manda negativo */}
+                                                {/* Aqui corregimos visualmente si el backend manda negativo */}
                                                 {item.km_restantes < 0
                                                     ? `¡Te pasaste por ${Math.abs(item.km_restantes)} km!`
-                                                    : item.dias_restantes < 0
+                                                    : (item.dias_restantes < 3650 && item.dias_restantes < 0)
                                                         ? `¡Vencido hace ${Math.abs(item.dias_restantes)} día${Math.abs(item.dias_restantes) === 1 ? '' : 's'}!`
                                                         : `Faltan ${item.km_restantes} km.`}
                                             </span>
@@ -145,6 +186,17 @@ export const MotoDashboard = () => {
                                 </div>
 
                                 <div className="d-flex gap-2 align-items-center">
+                                    <button
+                                        className="btn btn-outline-info btn-sm"
+                                        title="Ver Historial"
+                                        onClick={() => {
+                                            setSelectedItemForHistory({ id: item.item_id, task: item.tarea });
+                                            setShowHistoryModal(true);
+                                        }}
+                                    >
+                                        Ver 👁️
+                                    </button>
+
                                     <button className="btn btn-outline-danger btn-sm"
                                         onClick={async () => {
                                             // Using standard confirm as placeholder, ideally use toast/modal but specific request was just replace alerts
@@ -205,6 +257,40 @@ export const MotoDashboard = () => {
                     onSuccess={() => fetchDashboard()}
                 />
             )}
+
+            {/* MODAL HISTORY */}
+            {selectedItemForHistory && (
+                <HistoryListModal
+                    show={showHistoryModal}
+                    onClose={() => setShowHistoryModal(false)}
+                    motoId={moto.id}
+                    itemId={selectedItemForHistory.id === 0 ? null : selectedItemForHistory.id}
+                    taskName={selectedItemForHistory.task}
+                />
+            )}
+
+            {/* MODAL ODOMETER HISTORY */}
+            <OdometerHistoryModal
+                show={showOdometerHistoryModal}
+                onClose={() => setShowOdometerHistoryModal(false)}
+                motoId={moto.id}
+            />
+
+            {/* MODALS FUEL */}
+            <FuelFormModal
+                show={showFuelFormModal}
+                onClose={() => setShowFuelFormModal(false)}
+                motoId={moto.id}
+                currentKm={moto.km_actual}
+                onSuccess={() => fetchDashboard()}
+            />
+
+            <FuelHistoryModal
+                show={showFuelHistoryModal}
+                onClose={() => setShowFuelHistoryModal(false)}
+                motoId={moto.id}
+                onSuccess={() => fetchDashboard()}
+            />
         </div>
     );
 };

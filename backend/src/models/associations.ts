@@ -3,6 +3,9 @@ import { MaintenanceHistory } from "./maintenance_history.model";
 import { ItemsPlan } from "./items_plan.model";
 import { Motorcycle } from "./motorcycle.model";
 import { User } from "./user.model";
+import { OdometerHistory } from "./odometer_history.model";
+import { FuelRecord } from "./fuel_record.model";
+import { WarehouseItem } from "./warehouse_item.model";
 
 
 export const setupAssociations = () => {
@@ -71,4 +74,33 @@ export const setupAssociations = () => {
         as: 'usuario'
     });
 
+    // --- 6. Moto <-> Historial Odometro (Uno a Muchos) ---
+    Motorcycle.hasMany(OdometerHistory, {
+        foreignKey: 'moto_id',
+        as: 'historial_odometro'
+    });
+    OdometerHistory.belongsTo(Motorcycle, {
+        foreignKey: 'moto_id',
+        as: 'moto'
+    });
+
+    // --- 7. Moto <-> Registro Combustible (Uno a Muchos) ---
+    Motorcycle.hasMany(FuelRecord, {
+        foreignKey: 'moto_id',
+        as: 'registros_combustible'
+    });
+    FuelRecord.belongsTo(Motorcycle, {
+        foreignKey: 'moto_id',
+        as: 'moto'
+    });
+
+    // --- 8. User <-> Almacen (Uno a Muchos) ---
+    User.hasMany(WarehouseItem, {
+        foreignKey: 'user_id',
+        as: 'items_almacen'
+    });
+    WarehouseItem.belongsTo(User, {
+        foreignKey: 'user_id',
+        as: 'usuario'
+    });
 };

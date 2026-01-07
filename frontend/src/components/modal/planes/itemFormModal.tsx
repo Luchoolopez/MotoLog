@@ -86,6 +86,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                     <input
                                         type="number" className="form-control"
                                         min="0"
+                                        placeholder="0 = Sin fecha"
                                         value={formData.intervalo_meses}
                                         onChange={e => setFormData({
                                             ...formData,

@@ -90,22 +90,22 @@ export class MotoController {
             await this.motoService.getMotoByIdAndUser(Number(id), req.user!.id); // verify ownership
             const updated = await this.motoService.updateMoto(Number(id), validatedData);
             return res.status(200).json({
-                success:true,
-                message:'Moto actualizada correctamente',
-                data:updated
+                success: true,
+                message: 'Moto actualizada correctamente',
+                data: updated
             })
-        } catch (error:any) {
-            if(error.message.includes('no encontrado') || error.message.includes('pertenece') || error.message.includes('Formato') || error.message.includes('fecha') || error.message.includes('marca') || error.message.includes('modelo') || error.message.includes('anio') || error.message.includes('patente') || error.message.includes('km_actual') || error.message.includes('plan_id')){
+        } catch (error: any) {
+            if (error.message.includes('no encontrado') || error.message.includes('pertenece') || error.message.includes('Formato') || error.message.includes('fecha') || error.message.includes('marca') || error.message.includes('modelo') || error.message.includes('anio') || error.message.includes('patente') || error.message.includes('km_actual') || error.message.includes('plan_id')) {
                 return res.status(400).json({
-                    success:false,
-                    message:'Datos inválidos o moto no encontrado o no pertenece al usuario',
-                    error:error.message
+                    success: false,
+                    message: 'Datos inválidos o moto no encontrado o no pertenece al usuario',
+                    error: error.message
                 })
             }
             return res.status(500).json({
-                success:false,
-                message:'Error a la hora de actualizar la moto',
-                error:error.message
+                success: false,
+                message: 'Error a la hora de actualizar la moto',
+                error: error.message
             })
         }
     }
@@ -113,7 +113,7 @@ export class MotoController {
     updateMileage = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { newKm } = req.body;
+            const { newKm, date } = req.body;
             if (!id || isNaN(Number(id))) {
                 return res.status(400).json({
                     success: false,
@@ -128,17 +128,17 @@ export class MotoController {
                 })
             }
             await this.motoService.getMotoByIdAndUser(Number(id), req.user!.id); // verify ownership
-            const updatedMileage = await this.motoService.updateMileage(Number(id), Number(newKm));
+            const updatedMileage = await this.motoService.updateMileage(Number(id), Number(newKm), date);
             return res.status(200).json({
                 success: true,
                 message: 'Kilometraje actualizado exitosamente',
                 data: updatedMileage
             })
         } catch (error: any) {
-            if(error.message.includes('no encontrado') || error.message.includes('pertenece')){
+            if (error.message.includes('no encontrado') || error.message.includes('pertenece')) {
                 return res.status(404).json({
-                    success:false,
-                    message:'Moto no encontrado o no pertenece al usuario'
+                    success: false,
+                    message: 'Moto no encontrado o no pertenece al usuario'
                 })
             }
             return res.status(500).json({
@@ -168,10 +168,10 @@ export class MotoController {
                 data: eliminated
             })
         } catch (error: any) {
-            if(error.message.includes('no encontrado') || error.message.includes('pertenece')){
+            if (error.message.includes('no encontrado') || error.message.includes('pertenece')) {
                 return res.status(404).json({
-                    success:false,
-                    message:'Moto no encontrado o no pertenece al usuario'
+                    success: false,
+                    message: 'Moto no encontrado o no pertenece al usuario'
                 })
             }
             return res.status(500).json({

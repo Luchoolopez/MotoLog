@@ -3,7 +3,7 @@ import { MaintenanceHistory } from "../models/maintenance_history.model";
 import { createItemsPlanType, updateItemsPlanType } from "../validations/items_plan.schema";
 
 export class ItemsService {
-    
+
     async createItem(data: createItemsPlanType) {
         try {
             const newItem = await ItemsPlan.create(data);
@@ -32,15 +32,13 @@ export class ItemsService {
     }
 
     async deleteItem(id: number) {
-        const historialCount = await MaintenanceHistory.count({where:{item_plan_id:id}});
-        if(historialCount > 0){
-            throw new Error('No se puede eliminar este item porque hay historiales que depende el. Editalo en su lugar');
-        }
+        // Cascade Delete: First remove all history records associated with this item
+        await MaintenanceHistory.destroy({ where: { item_plan_id: id } });
         const item = await this.getItemById(id);
         await item.destroy();
-        return {message:'Item eliminado correctamente'}
+        return { message: 'Item eliminado correctamente' }
     }
-    
+
     async getItemsByPlanId(planId: number) {
         return await ItemsPlan.findAll({ where: { plan_id: planId } });
     }

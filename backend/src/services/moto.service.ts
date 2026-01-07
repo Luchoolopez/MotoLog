@@ -1,6 +1,7 @@
 import { Motorcycle, MotorcycleCreationAttributes } from "../models/motorcycle.model";
 import { MaintenancePlan } from "../models/maintenance_plan.model";
 import { ItemsPlan } from "../models/items_plan.model";
+import { OdometerHistory } from "../models/odometer_history.model";
 import { createMotorcycleType, updateMotorcycleType } from "../validations/motorcycle.schema";
 
 export class MotoService {
@@ -42,17 +43,48 @@ export class MotoService {
         return moto;
     }
 
-    async updateMileage(id: number, newKm: number) {
-        const moto = await this.getMotoById(id);
+    async updateMileage(id: number, newKm: number, date?: string) {
+        try {
+            const moto = await this.getMotoById(id);
 
-        if (newKm < 0) {
-            throw new Error('El nuevo kilometraje no puede ser menor a 0');
+            if (newKm < 0) {
+                throw new Error('El kilometraje no puede ser negativo');
+            }
+
+            // [LOGGING] Save verification history
+            // We use the date from the frontend, or the current time if not provided.
+            // If it's just a date (YYYY-MM-DD), we ensure it's treated as UTC midnight
+            // to avoid shifted dates due to local timezone.
+            let recordDate: Date;
+            if (date) {
+                // If date is "YYYY-MM-DD", appending "T00:00:00Z" makes it UTC midnight
+                recordDate = new Date(date.includes('T') ? date : `${date}T12:00:00Z`);
+            } else {
+                recordDate = new Date();
+            }
+
+            await OdometerHistory.create({
+                moto_id: id,
+                km: newKm,
+                fecha: recordDate,
+                observaciones: 'Actualización manual'
+            });
+
+            // Instead of just updating with the current entry, 
+            // we find the record with the most recent date to set as km_actual.
+            const latestRecord = await OdometerHistory.findOne({
+                where: { moto_id: id },
+                order: [['fecha', 'DESC'], ['id', 'DESC']]
+            });
+
+            if (latestRecord) {
+                await moto.update({ km_actual: latestRecord.km });
+            }
+
+            return moto;
+        } catch (error) {
+            throw new Error('Error al actualizar kilometraje: ' + error);
         }
-        // Removed validation to allow corrections: if (newKm < moto.km_actual)
-
-        moto.km_actual = newKm;
-        await moto.save();
-        return moto;
     }
 
     async updateMoto(id: number, data: updateMotorcycleType) {

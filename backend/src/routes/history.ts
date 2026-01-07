@@ -5,10 +5,10 @@ const historyRouter = Router();
 const historyController = new MaintenanceHistoryController();
 
 historyRouter.post('/', historyController.createHistory);
-historyRouter.put('/:id', historyController.updateHistory); 
-historyRouter.delete('/:id', historyController.deleteHistory); 
+historyRouter.put('/:id', historyController.updateHistory);
+historyRouter.delete('/:id', historyController.deleteHistory);
 
 historyRouter.get('/moto/:id', historyController.getByMotoId);
 
 export default historyRouter;
-export {historyRouter as Router};
+export { historyRouter as Router };

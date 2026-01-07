@@ -31,11 +31,12 @@ export class MaintenanceHistoryController {
                 data: record
             });
         } catch (error: any) {
-            console.error(error);
+            console.error("Controller Error:", error);
             return res.status(500).json({
                 success: false,
-                message: 'Error al registrar el mantenimiento',
-                error: error.message
+                message: error.message || 'Error al registrar el mantenimiento',
+                error: error.name,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             });
         }
     }

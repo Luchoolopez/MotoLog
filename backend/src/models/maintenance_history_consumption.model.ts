@@ -46,7 +46,7 @@ MaintenanceHistoryConsumption.init(
     {
         sequelize,
         tableName: 'historial_mantenimiento_consumo',
-        modelName: 'historial_mantenimiento_consumo',
+        modelName: 'MaintenanceHistoryConsumption',
         timestamps: false,
         freezeTableName: true
     }

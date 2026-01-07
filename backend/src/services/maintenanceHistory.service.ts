@@ -22,43 +22,60 @@ export class MaintenanceHistoryService {
 
             // 1. Crear el registro de historial
             const newRecord = await MaintenanceHistory.create(historyData as any, { transaction: t });
-            console.log("✅ Historial creado. ID:", newRecord.id);
+            const historyId = newRecord.id;
+            console.log("✅ Historial creado. ID:", historyId);
 
             // 2. Procesar deducción de stock y consumos
-            if (consumed_items && Array.isArray(consumed_items)) {
+            if (consumed_items && Array.isArray(consumed_items) && consumed_items.length > 0) {
                 console.log(`Procesando ${consumed_items.length} ítems consumidos.`);
-                for (const consumed of consumed_items) {
-                    const itemId = Number(consumed.warehouse_item_id);
-                    const cantidad = Number(consumed.cantidad_usada) || 1;
 
-                    console.log(`--- [ITEM ID: ${itemId}] ---`);
-                    const warehouseItem = await WarehouseItem.findByPk(itemId, { transaction: t });
+                // Agrupar por ID para evitar múltiples updates al mismo registro en la misma transacción
+                const grouped = consumed_items.reduce((acc: any, item: any) => {
+                    const id = Number(item.warehouse_item_id);
+                    if (!id) return acc;
+                    acc[id] = (acc[id] || 0) + Math.max(1, Number(item.cantidad_usada) || 1);
+                    return acc;
+                }, {});
 
-                    if (warehouseItem) {
-                        const newStock = Math.max(0, warehouseItem.stock_actual - cantidad);
-                        console.log(`Deduciendo stock: ${warehouseItem.nombre} (${warehouseItem.stock_actual} -> ${newStock})`);
+                for (const [itemIdStr, cantidadUsada] of Object.entries(grouped)) {
+                    const warehouseItemId = Number(itemIdStr);
+                    const cantidad = Number(cantidadUsada);
 
-                        await warehouseItem.update({ stock_actual: newStock }, { transaction: t });
+                    console.log(`--- [ITEM ID: ${warehouseItemId}] ---`);
+                    const warehouseItem = await WarehouseItem.findByPk(warehouseItemId, { transaction: t });
 
-                        await MaintenanceHistoryConsumption.create({
-                            maintenance_history_id: newRecord.id,
-                            warehouse_item_id: itemId,
-                            cantidad_usada: cantidad
-                        }, { transaction: t });
-
-                        console.log(`✅ Consumo registrado para: ${warehouseItem.nombre}`);
-                    } else {
-                        console.error(`❌ ERROR: Ítem de almacén ID ${itemId} NO ENCONTRADO.`);
-                        throw new Error(`El ítem de almacén con ID ${itemId} no fue encontrado. Es posible que haya sido eliminado.`);
+                    if (!warehouseItem) {
+                        console.error(`❌ ERROR: Ítem de almacén ID ${warehouseItemId} NO ENCONTRADO.`);
+                        throw new Error(`El ítem de almacén con ID ${warehouseItemId} no fue encontrado.`);
                     }
+
+                    const stockAnterior = warehouseItem.stock_actual;
+                    const stockNuevo = stockAnterior - cantidad;
+
+                    console.log(`Deduciendo stock para ${warehouseItem.nombre}: ${stockAnterior} -> ${stockNuevo}`);
+
+                    // Actualización directa
+                    await warehouseItem.update({ stock_actual: Math.max(0, stockNuevo) }, { transaction: t });
+
+                    // Registrar el consumo en la tabla intermedia
+                    await MaintenanceHistoryConsumption.create({
+                        maintenance_history_id: historyId,
+                        warehouse_item_id: warehouseItemId,
+                        cantidad_usada: cantidad
+                    }, { transaction: t });
+
+                    console.log(`✅ Consumo registrado para: ${warehouseItem.nombre}`);
                 }
             }
 
             // 3. Actualizar odómetro de la moto si corresponde
-            const moto = await Motorcycle.findByPk(data.moto_id, { transaction: t });
-            if (moto && Number(data.km_realizado) > Number(moto.km_actual)) {
-                console.log(`Actualizando KM moto: ${moto.id}: ${moto.km_actual} -> ${data.km_realizado}`);
-                await moto.update({ km_actual: Number(data.km_realizado) }, { transaction: t });
+            const motoId = Number(data.moto_id);
+            const kmRealizado = Number(data.km_realizado);
+
+            const moto = await Motorcycle.findByPk(motoId, { transaction: t });
+            if (moto && kmRealizado > Number(moto.km_actual)) {
+                console.log(`Actualizando KM moto ${moto.id}: ${moto.km_actual} -> ${kmRealizado}`);
+                await moto.update({ km_actual: kmRealizado }, { transaction: t });
             }
 
             await t.commit();
@@ -66,18 +83,21 @@ export class MaintenanceHistoryService {
             return newRecord;
 
         } catch (error: any) {
-            await t.rollback();
+            if (t) await t.rollback();
             console.error("--- ERROR EN REGISTRO DE MANTENIMIENTO ---");
-            console.error("Detalle del error:", error);
+            console.error("Mensaje:", error.message);
+            console.error("Stack:", error.stack);
 
+            // Re-lanzamos un error con más contexto si es posible
             if (error.name === 'SequelizeForeignKeyConstraintError') {
-                throw new Error('Error de integridad: El ID de la moto o el ítem no son válidos.');
+                throw new Error(`Error de integridad (FK): Verifique que el ID de la moto (${data.moto_id}) y los IDs de los ítems del almacén sean correctos.`);
             }
             if (error.name === 'SequelizeValidationError') {
-                throw new Error('Error de validación: ' + error.errors.map((e: any) => e.message).join(', '));
+                const details = error.errors.map((e: any) => e.message).join(', ');
+                throw new Error(`Error de validación: ${details}`);
             }
 
-            throw new Error('No se pudo registrar el mantenimiento: ' + (error.message || error));
+            throw error; // Lanzar el error original para capturar el mensaje exacto
         }
     }
 

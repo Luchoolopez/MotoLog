@@ -15,7 +15,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
         categoria: 'Repuesto',
         fecha_compra: new Date().toISOString().split('T')[0],
         precio_compra: 0,
-        cantidad: 1,
+        cantidad: 0,
         nro_parte: '',
         lugar_compra: '',
         modelo_moto: '',
@@ -45,7 +45,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                     categoria: 'Repuesto',
                     fecha_compra: new Date().toISOString().split('T')[0],
                     precio_compra: 0,
-                    cantidad: 1,
+                    cantidad: 0,
                     nro_parte: '',
                     lugar_compra: '',
                     modelo_moto: '',
@@ -153,7 +153,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         type="number" className="form-control"
                                         value={formData.cantidad}
                                         onChange={e => setFormData({ ...formData, cantidad: Number(e.target.value) })}
-                                        min="1" required
+                                        min="0" required
                                     />
                                 </div>
 

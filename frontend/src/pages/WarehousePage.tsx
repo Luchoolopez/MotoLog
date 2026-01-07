@@ -12,6 +12,8 @@ const WarehousePage = () => {
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [filter, setFilter] = useState<'All' | 'Repuesto' | 'Accesorio' | 'Sistemático'>('All');
     const [searchTerm, setSearchTerm] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     const { showToast } = useToast();
 
@@ -65,6 +67,13 @@ const WarehousePage = () => {
             return acc;
         }
 
+        // --- Date Filter ---
+        if (dateFrom || dateTo) {
+            const itemDate = new Date(item.fecha_compra).toISOString().split('T')[0];
+            if (dateFrom && itemDate < dateFrom) return acc;
+            if (dateTo && itemDate > dateTo) return acc;
+        }
+
         const key = `${item.nombre.toLowerCase()}_${(item.nro_parte || '').toLowerCase()}`;
         if (!acc[key]) {
             acc[key] = {
@@ -85,7 +94,23 @@ const WarehousePage = () => {
 
     const groups = Object.values(groupedItems).sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-    const totalInversion = items.reduce((acc, item) => acc + (item.precio_compra * item.cantidad), 0);
+    const totalInversion = items.reduce((acc, item) => {
+        // Apply the same filters to the total investment
+        if (filter !== 'All' && item.categoria !== filter) return acc;
+
+        const searchUpper = searchTerm.toUpperCase();
+        if (searchTerm && !item.nombre.toUpperCase().includes(searchUpper) && !(item.nro_parte || '').toUpperCase().includes(searchUpper)) {
+            return acc;
+        }
+
+        if (dateFrom || dateTo) {
+            const itemDate = new Date(item.fecha_compra).toISOString().split('T')[0];
+            if (dateFrom && itemDate < dateFrom) return acc;
+            if (dateTo && itemDate > dateTo) return acc;
+        }
+
+        return acc + (item.precio_compra * item.cantidad);
+    }, 0);
 
     return (
         <div className="container py-4">
@@ -130,7 +155,7 @@ const WarehousePage = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-lg-4 text-end">
+                            <div className="col-lg-2 text-end">
                                 <div className="btn-group" role="group">
                                     {['All', 'Repuesto', 'Accesorio', 'Sistemático'].map((cat) => (
                                         <button
@@ -142,6 +167,43 @@ const WarehousePage = () => {
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+                        </div>
+                        <div className="row g-3 mt-1 align-items-center">
+                            <div className="col-md-auto">
+                                <small className="text-white-50 me-2">Filtrar por Fecha:</small>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text bg-transparent text-white border-secondary">Desde</span>
+                                    <input
+                                        type="date"
+                                        className="form-control bg-dark text-white border-secondary"
+                                        value={dateFrom}
+                                        onChange={(e) => setDateFrom(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text bg-transparent text-white border-secondary">Hasta</span>
+                                    <input
+                                        type="date"
+                                        className="form-control bg-dark text-white border-secondary"
+                                        value={dateTo}
+                                        onChange={(e) => setDateTo(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-auto">
+                                {(dateFrom || dateTo) && (
+                                    <button
+                                        className="btn btn-sm btn-outline-danger border-0"
+                                        onClick={() => { setDateFrom(''); setDateTo(''); }}
+                                    >
+                                        ✕ Limpiar Fechas
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -190,7 +252,11 @@ const WarehousePage = () => {
                                             </div>
                                             <div className="col-md-2 text-center border-end">
                                                 <small className="d-block text-muted text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>En Stock</small>
-                                                <span className={`fs-4 fw-bold ${group.stockActual > 0 ? 'text-success' : 'text-danger'}`}>{group.stockActual}</span>
+                                                {group.stockActual > 0 ? (
+                                                    <span className="fs-4 fw-bold text-success">{group.stockActual}</span>
+                                                ) : (
+                                                    <span className="badge bg-danger">SIN STOCK</span>
+                                                )}
                                             </div>
                                             <div className="col-md-3 text-end pe-4">
                                                 <button

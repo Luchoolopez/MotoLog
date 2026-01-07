@@ -7,6 +7,7 @@ interface itemsPlanAttributes {
     tarea: string;
     intervalo_km: number;
     intervalo_meses: number;
+    consumo_sistematico?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -20,6 +21,7 @@ export class ItemsPlan extends Model<itemsPlanAttributes, itemsPlanCreationAttri
     public tarea!: string;
     public intervalo_km!: number;
     public intervalo_meses!: number;
+    public consumo_sistematico!: boolean;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -47,11 +49,16 @@ ItemsPlan.init(
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        consumo_sistematico: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        }
     },
     {
         sequelize,
         tableName: 'items_plan',
-        modelName: 'item_plan',
+        modelName: 'ItemsPlan',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at'

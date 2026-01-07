@@ -58,7 +58,7 @@ WarehouseItem.init(
             allowNull: false
         },
         categoria: {
-            type: DataTypes.ENUM('Repuesto', 'Accesorio', 'Sistemático'),
+            type: DataTypes.STRING(50),
             allowNull: false
         },
         fecha_compra: {
@@ -96,7 +96,7 @@ WarehouseItem.init(
     {
         sequelize,
         tableName: 'almacen_items',
-        modelName: 'warehouse_item',
+        modelName: 'WarehouseItem',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at'

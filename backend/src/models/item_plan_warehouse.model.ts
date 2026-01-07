@@ -44,7 +44,7 @@ ItemPlanWarehouse.init(
     {
         sequelize,
         tableName: 'item_plan_warehouse',
-        modelName: 'item_plan_warehouse',
+        modelName: 'ItemPlanWarehouse',
         timestamps: false,
         freezeTableName: true
     }

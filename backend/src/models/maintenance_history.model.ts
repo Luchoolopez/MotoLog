@@ -58,7 +58,7 @@ MaintenanceHistory.init(
     {
         sequelize,
         tableName: 'historial_mantenimiento',
-        modelName: 'historial_mantenimiento',
+        modelName: 'MaintenanceHistory',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at'

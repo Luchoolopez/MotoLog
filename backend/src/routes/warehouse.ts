@@ -12,5 +12,6 @@ router.get("/", controller.getAll);
 router.get("/:id", controller.getById);
 router.put("/:id", controller.update);
 router.delete("/:id", controller.delete);
+router.get("/:id/history", controller.getHistory);
 
 export default router;

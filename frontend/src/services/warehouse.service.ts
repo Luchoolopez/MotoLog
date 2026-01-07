@@ -52,5 +52,12 @@ export const WarehouseService = {
 
     delete: async (id: number): Promise<void> => {
         await apiClient.delete(`/warehouse/${id}`);
+    },
+
+    getItemHistory: async (id: number, isGlobal: boolean = false): Promise<any[]> => {
+        const response = await apiClient.get(`/warehouse/${id}/history`, {
+            params: { global: isGlobal }
+        });
+        return response.data.data;
     }
 };

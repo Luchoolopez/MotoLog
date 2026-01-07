@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { WarehouseService, type WarehouseItem } from "../services/warehouse.service";
 import { WarehouseItemModal } from "../components/modal/warehouse/WarehouseItemModal";
+import { ItemUsageHistoryModal } from "../components/modal/warehouse/ItemUsageHistoryModal";
 import { useToast } from "../context/ToastContext";
 
 const WarehousePage = () => {
@@ -8,7 +9,9 @@ const WarehousePage = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(null);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [filter, setFilter] = useState<'All' | 'Repuesto' | 'Accesorio' | 'Sistemático'>('All');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { showToast } = useToast();
 
@@ -33,6 +36,11 @@ const WarehousePage = () => {
         setShowModal(true);
     };
 
+    const handleHistory = (item: WarehouseItem) => {
+        setSelectedItem(item);
+        setShowHistoryModal(true);
+    };
+
     const handleDelete = async (id: number) => {
         if (window.confirm('¿Estás seguro de eliminar este item del almacén?')) {
             try {
@@ -45,9 +53,37 @@ const WarehousePage = () => {
         }
     };
 
-    const filteredItems = items.filter(item =>
-        filter === 'All' ? true : item.categoria === filter
-    );
+    // --- Grouping Logic ---
+    const groupedItems = items.reduce((acc, item) => {
+        if (filter !== 'All' && item.categoria !== filter) return acc;
+
+        const searchUpper = searchTerm.toUpperCase();
+        const itemNombre = item.nombre.toUpperCase();
+        const itemParte = (item.nro_parte || '').toUpperCase();
+
+        if (searchTerm && !itemNombre.includes(searchUpper) && !itemParte.includes(searchUpper)) {
+            return acc;
+        }
+
+        const key = `${item.nombre.toLowerCase()}_${(item.nro_parte || '').toLowerCase()}`;
+        if (!acc[key]) {
+            acc[key] = {
+                nombre: item.nombre,
+                nro_parte: item.nro_parte,
+                categoria: item.categoria,
+                modelo_moto: item.modelo_moto,
+                totalComprado: 0,
+                stockActual: 0,
+                batches: []
+            };
+        }
+        acc[key].totalComprado += item.cantidad;
+        acc[key].stockActual += item.stock_actual;
+        acc[key].batches.push(item);
+        return acc;
+    }, {} as Record<string, any>);
+
+    const groups = Object.values(groupedItems).sort((a, b) => a.nombre.localeCompare(b.nombre));
 
     const totalInversion = items.reduce((acc, item) => acc + (item.precio_compra * item.cantidad), 0);
 
@@ -67,39 +103,46 @@ const WarehousePage = () => {
             </div>
 
             <div className="row mb-4">
-                <div className="col-md-8">
-                    <div className="btn-group shadow-sm" role="group">
-                        <button
-                            className={`btn ${filter === 'All' ? 'btn-dark' : 'btn-outline-dark'}`}
-                            onClick={() => setFilter('All')}
-                        >
-                            Todos ({items.length})
-                        </button>
-                        <button
-                            className={`btn ${filter === 'Repuesto' ? 'btn-dark' : 'btn-outline-dark'}`}
-                            onClick={() => setFilter('Repuesto')}
-                        >
-                            Repuestos ({items.filter(i => i.categoria === 'Repuesto').length})
-                        </button>
-                        <button
-                            className={`btn ${filter === 'Accesorio' ? 'btn-dark' : 'btn-outline-dark'}`}
-                            onClick={() => setFilter('Accesorio')}
-                        >
-                            Accesorios ({items.filter(i => i.categoria === 'Accesorio').length})
-                        </button>
-                        <button
-                            className={`btn ${filter === 'Sistemático' ? 'btn-dark' : 'btn-outline-dark'}`}
-                            onClick={() => setFilter('Sistemático')}
-                        >
-                            Sistemáticos ({items.filter(i => i.categoria === 'Sistemático').length})
-                        </button>
-                    </div>
-                </div>
-                <div className="col-md-4 text-end">
-                    <div className="card border-0 shadow-sm bg-success text-white">
-                        <div className="card-body py-2 px-3">
-                            <small className="d-block opacity-75">Inversión Total</small>
-                            <h4 className="mb-0">${totalInversion.toLocaleString()}</h4>
+                <div className="col-md-12">
+                    <div className="card border-0 shadow-sm bg-dark text-white p-3 mb-3">
+                        <div className="row align-items-center g-3">
+                            <div className="col-lg-4">
+                                <div className="d-flex gap-4">
+                                    <div>
+                                        <small className="d-block opacity-75">Inversión Total</small>
+                                        <h4 className="mb-0">${totalInversion.toLocaleString()}</h4>
+                                    </div>
+                                    <div>
+                                        <small className="d-block opacity-75">Items Diferentes</small>
+                                        <h4 className="mb-0">{groups.length}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-lg-4">
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white border-0 pe-0">🔍</span>
+                                    <input
+                                        type="text"
+                                        className="form-control border-0 shadow-none ps-2"
+                                        placeholder="Buscar por nombre o número de parte..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-lg-4 text-end">
+                                <div className="btn-group" role="group">
+                                    {['All', 'Repuesto', 'Accesorio', 'Sistemático'].map((cat) => (
+                                        <button
+                                            key={cat}
+                                            className={`btn btn-sm ${filter === cat ? 'btn-light' : 'btn-outline-light'}`}
+                                            onClick={() => setFilter(cat as any)}
+                                        >
+                                            {cat === 'All' ? 'Todos' : cat + 's'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -111,69 +154,105 @@ const WarehousePage = () => {
                         <span className="visually-hidden">Cargando...</span>
                     </div>
                 </div>
-            ) : filteredItems.length === 0 ? (
+            ) : groups.length === 0 ? (
                 <div className="text-center py-5 bg-light rounded-4 border-dashed">
-                    <h3 className="text-muted mb-0">No hay items en esta categoría</h3>
-                    <p className="text-muted">¡Tus compras aparecerán aquí!</p>
+                    <h3 className="text-muted mb-0">No hay items registrados</h3>
                 </div>
             ) : (
-                <div className="table-responsive shadow-sm rounded-4 overflow-hidden bg-white">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Item / Nomenclatura</th>
-                                <th>Modelo</th>
-                                <th>Categoría</th>
-                                <th>Nro Parte</th>
-                                <th>Fecha</th>
-                                <th className="text-end">Precio Un.</th>
-                                <th className="text-center">Cant.</th>
-                                <th className="text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredItems.map(item => (
-                                <tr key={item.id}>
-                                    <td>
-                                        <div className="fw-bold text-primary">{item.nombre}</div>
-                                        <small className="text-muted d-block" style={{ maxWidth: '200px' }}>
-                                            {item.lugar_compra ? `🛒 ${item.lugar_compra}` : ''}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <span className="text-muted small">{item.modelo_moto || '-'}</span>
-                                    </td>
-                                    <td>
-                                        <span className={`badge rounded-pill ${item.categoria === 'Repuesto' ? 'bg-primary' :
-                                            item.categoria === 'Accesorio' ? 'bg-info' : 'bg-warning text-dark'
-                                            }`}>
-                                            {item.categoria}
-                                        </span>
-                                    </td>
-                                    <td><code className="text-dark bg-light px-2 rounded small">{item.nro_parte || '-'}</code></td>
-                                    <td>{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
-                                    <td className="text-end fw-bold">${item.precio_compra.toLocaleString()}</td>
-                                    <td className="text-center">
-                                        <span className="badge bg-secondary">{item.cantidad}</span>
-                                    </td>
-                                    <td className="text-end">
-                                        <button
-                                            className="btn btn-sm btn-outline-primary me-2 shadow-sm"
-                                            onClick={() => handleEdit(item)}
-                                        >
-                                            ✏️
-                                        </button>
-                                        <button
-                                            className="btn btn-sm btn-outline-danger shadow-sm"
-                                            onClick={() => handleDelete(item.id)}
-                                        >
-                                            🗑️
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="accordion shadow-sm rounded-4 overflow-hidden" id="warehouseAccordion">
+                    {groups.map((group, gIdx) => (
+                        <div className="accordion-item border-0 border-bottom" key={gIdx}>
+                            <h2 className="accordion-header">
+                                <button
+                                    className="accordion-button bg-white py-3 shadow-none"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target={`#collapse-${gIdx}`}
+                                    aria-expanded="true"
+                                >
+                                    <div className="container-fluid p-0">
+                                        <div className="row align-items-center g-2">
+                                            <div className="col-md-5">
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <span className={`badge rounded-pill ${group.categoria === 'Repuesto' ? 'bg-primary' :
+                                                        group.categoria === 'Accesorio' ? 'bg-info' : 'bg-warning text-dark'
+                                                        }`}>
+                                                        {group.categoria}
+                                                    </span>
+                                                    <span className="fw-bold fs-5 text-dark">{group.nombre}</span>
+                                                    {group.nro_parte && <code className="ms-2">{group.nro_parte}</code>}
+                                                </div>
+                                                <small className="text-muted">{group.modelo_moto || 'Compatible con todas'}</small>
+                                            </div>
+                                            <div className="col-md-2 text-center border-start border-end">
+                                                <small className="d-block text-muted text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Comprado</small>
+                                                <span className="fs-5 fw-bold">{group.totalComprado}</span>
+                                            </div>
+                                            <div className="col-md-2 text-center border-end">
+                                                <small className="d-block text-muted text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>En Stock</small>
+                                                <span className={`fs-4 fw-bold ${group.stockActual > 0 ? 'text-success' : 'text-danger'}`}>{group.stockActual}</span>
+                                            </div>
+                                            <div className="col-md-3 text-end pe-4">
+                                                <button
+                                                    className="btn btn-sm btn-info text-white shadow-sm"
+                                                    onClick={(e) => { e.stopPropagation(); handleHistory(group.batches[0]); }}
+                                                >
+                                                    🕓 Historial Global
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id={`collapse-${gIdx}`} className="accordion-collapse collapse show">
+                                <div className="accordion-body p-0 bg-light bg-opacity-50">
+                                    <div className="table-responsive">
+                                        <table className="table table-sm table-borderless align-middle mb-0">
+                                            <thead className="small text-muted text-uppercase border-bottom">
+                                                <tr>
+                                                    <th className="ps-4 py-2">Fecha Compra</th>
+                                                    <th className="py-2">Lugar</th>
+                                                    <th className="text-end py-2">Precio Un.</th>
+                                                    <th className="text-center py-2">Cant. Compra</th>
+                                                    <th className="text-center py-2">Cant. Stock</th>
+                                                    <th className="text-end pe-4 py-2">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {group.batches.sort((a: any, b: any) => new Date(b.fecha_compra).getTime() - new Date(a.fecha_compra).getTime()).map((item: WarehouseItem) => (
+                                                    <tr key={item.id} className="border-bottom-dashed">
+                                                        <td className="ps-4 py-3">{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
+                                                        <td className="py-3">{item.lugar_compra || '-'}</td>
+                                                        <td className="text-end fw-bold py-3">${item.precio_compra.toLocaleString()}</td>
+                                                        <td className="text-center py-3">
+                                                            <span className="badge bg-secondary">{item.cantidad}</span>
+                                                        </td>
+                                                        <td className="text-center py-3">
+                                                            <span className={`badge ${item.stock_actual > 0 ? 'bg-success' : 'bg-danger'}`}>{item.stock_actual}</span>
+                                                        </td>
+                                                        <td className="text-end pe-4 py-3">
+                                                            <button
+                                                                className="btn btn-xs btn-outline-primary me-1 py-0 px-2 shadow-sm"
+                                                                onClick={() => handleEdit(item)}
+                                                            >
+                                                                ✏️
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-xs btn-outline-danger py-0 px-2 shadow-sm"
+                                                                onClick={() => handleDelete(item.id)}
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -182,6 +261,13 @@ const WarehousePage = () => {
                 onClose={() => setShowModal(false)}
                 onSuccess={fetchItems}
                 initialData={selectedItem}
+            />
+
+            <ItemUsageHistoryModal
+                show={showHistoryModal}
+                onClose={() => setShowHistoryModal(false)}
+                itemId={selectedItem?.id || null}
+                itemName={selectedItem?.nombre || ''}
             />
         </div>
     );

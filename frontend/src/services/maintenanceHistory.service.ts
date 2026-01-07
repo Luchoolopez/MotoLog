@@ -6,6 +6,10 @@ export interface CreateHistoryDto {
     fecha_realizado: string;
     km_realizado: number;
     observaciones?: string;
+    consumed_items?: {
+        warehouse_item_id: number;
+        cantidad_usada: number;
+    }[];
 }
 
 export const MaintenanceHistoryService = {

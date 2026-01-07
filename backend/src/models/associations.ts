@@ -6,6 +6,8 @@ import { User } from "./user.model";
 import { OdometerHistory } from "./odometer_history.model";
 import { FuelRecord } from "./fuel_record.model";
 import { WarehouseItem } from "./warehouse_item.model";
+import { ItemPlanWarehouse } from "./item_plan_warehouse.model";
+import { MaintenanceHistoryConsumption } from "./maintenance_history_consumption.model";
 
 
 export const setupAssociations = () => {
@@ -102,5 +104,43 @@ export const setupAssociations = () => {
     WarehouseItem.belongsTo(User, {
         foreignKey: 'user_id',
         as: 'usuario'
+    });
+
+    // --- 9. ItemsPlan <-> WarehouseItem (Muchos a Muchos) ---
+    ItemsPlan.belongsToMany(WarehouseItem, {
+        through: ItemPlanWarehouse,
+        foreignKey: 'item_plan_id',
+        otherKey: 'warehouse_item_id',
+        as: 'items_almacen_asociados'
+    });
+    WarehouseItem.belongsToMany(ItemsPlan, {
+        through: ItemPlanWarehouse,
+        foreignKey: 'warehouse_item_id',
+        otherKey: 'item_plan_id',
+        as: 'reglas_asociadas'
+    });
+
+    // --- 10. MaintenanceHistory <-> WarehouseItem (Muchos a Muchos vía Consumo) ---
+    MaintenanceHistory.belongsToMany(WarehouseItem, {
+        through: MaintenanceHistoryConsumption,
+        foreignKey: 'maintenance_history_id',
+        otherKey: 'warehouse_item_id',
+        as: 'consumos'
+    });
+    WarehouseItem.belongsToMany(MaintenanceHistory, {
+        through: MaintenanceHistoryConsumption,
+        foreignKey: 'warehouse_item_id',
+        otherKey: 'maintenance_history_id',
+        as: 'usado_en_servicios'
+    });
+
+    // --- 11. MaintenanceHistoryConsumption (Join Table) BelongsTo associations ---
+    MaintenanceHistoryConsumption.belongsTo(MaintenanceHistory, {
+        foreignKey: 'maintenance_history_id',
+        as: 'mantenimiento'
+    });
+    MaintenanceHistoryConsumption.belongsTo(WarehouseItem, {
+        foreignKey: 'warehouse_item_id',
+        as: 'item'
     });
 };

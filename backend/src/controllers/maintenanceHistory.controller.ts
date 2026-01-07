@@ -10,7 +10,21 @@ export class MaintenanceHistoryController {
 
     createHistory = async (req: Request, res: Response) => {
         try {
-            const record = await this.historyService.create(req.body);
+            // Asegurar que valores numéricos lo sean
+            const data = { ...req.body };
+            if (data.km_realizado !== undefined) data.km_realizado = Number(data.km_realizado);
+            if (data.moto_id !== undefined) data.moto_id = Number(data.moto_id);
+            if (data.item_plan_id !== undefined) data.item_plan_id = Number(data.item_plan_id);
+
+            // También limpiar items consumidos si existen
+            if (data.consumed_items && Array.isArray(data.consumed_items)) {
+                data.consumed_items = data.consumed_items.map((i: any) => ({
+                    warehouse_item_id: Number(i.warehouse_item_id),
+                    cantidad_usada: Number(i.cantidad_usada)
+                }));
+            }
+
+            const record = await this.historyService.create(data);
             return res.status(201).json({
                 success: true,
                 message: 'Mantenimiento registrado correctamente',
@@ -29,13 +43,13 @@ export class MaintenanceHistoryController {
     getByMotoId = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            
+
             if (!id || isNaN(Number(id))) {
                 return res.status(400).json({ success: false, message: 'ID de moto inválido' });
             }
 
             const history = await this.historyService.getHistoryByMotoId(Number(id));
-            
+
             return res.status(200).json({
                 success: true,
                 message: 'Historial obtenido correctamente',
@@ -53,14 +67,14 @@ export class MaintenanceHistoryController {
 
     updateHistory = async (req: Request, res: Response) => {
         try {
-            const { id } = req.params; 
-            
+            const { id } = req.params;
+
             if (!id || isNaN(Number(id))) {
                 return res.status(400).json({ success: false, message: 'ID de registro inválido' });
             }
 
             const updatedRecord = await this.historyService.update(Number(id), req.body);
-            
+
             return res.status(200).json({
                 success: true,
                 message: 'Registro actualizado correctamente',
@@ -78,13 +92,13 @@ export class MaintenanceHistoryController {
     deleteHistory = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            
+
             if (!id || isNaN(Number(id))) {
                 return res.status(400).json({ success: false, message: 'ID inválido' });
             }
 
             const result = await this.historyService.delete(Number(id));
-            
+
             return res.status(200).json({
                 success: true,
                 message: 'Registro eliminado',

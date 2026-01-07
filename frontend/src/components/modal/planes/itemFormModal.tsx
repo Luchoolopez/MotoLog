@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "../../../context/ToastContext";
 import type { CreateItemDto } from "../../../types/item.types";
+import { WarehouseService, type WarehouseItem } from "../../../services/warehouse.service";
 
 interface Props {
     show: boolean;
@@ -14,9 +15,44 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
     const [formData, setFormData] = useState({
         tarea: '',
         intervalo_km: 0 as string | number,
-        intervalo_meses: 0 as string | number
+        intervalo_meses: 0 as string | number,
+        associated_items: [] as { warehouse_item_id: number, cantidad_sugerida: number }[]
     });
+    const [warehouseItems, setWarehouseItems] = useState<WarehouseItem[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (show) {
+            const fetchWarehouse = async () => {
+                try {
+                    const items = await WarehouseService.getAll();
+                    setWarehouseItems(items);
+                } catch (error) {
+                    console.error("Error fetching warehouse items", error);
+                }
+            };
+            fetchWarehouse();
+        }
+    }, [show]);
+
+    const handleAddAssociatedItem = () => {
+        setFormData({
+            ...formData,
+            associated_items: [...formData.associated_items, { warehouse_item_id: 0, cantidad_sugerida: 1 }]
+        });
+    };
+
+    const handleRemoveAssociatedItem = (index: number) => {
+        const newItems = [...formData.associated_items];
+        newItems.splice(index, 1);
+        setFormData({ ...formData, associated_items: newItems });
+    };
+
+    const handleAssociatedItemChange = (index: number, field: string, value: any) => {
+        const newItems = [...formData.associated_items];
+        newItems[index] = { ...newItems[index], [field]: value };
+        setFormData({ ...formData, associated_items: newItems });
+    };
 
     const { showToast } = useToast();
 
@@ -33,7 +69,8 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
             plan_id: planId,
             tarea: formData.tarea,
             intervalo_km: Number(formData.intervalo_km),
-            intervalo_meses: Number(formData.intervalo_meses)
+            intervalo_meses: Number(formData.intervalo_meses),
+            associated_items: formData.associated_items.filter(i => i.warehouse_item_id > 0)
         };
 
         const success = await onSubmit(newItem);
@@ -41,7 +78,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         setIsSubmitting(false);
 
         if (success) {
-            setFormData({ tarea: '', intervalo_km: 0, intervalo_meses: 0 });
+            setFormData({ tarea: '', intervalo_km: 0, intervalo_meses: 0, associated_items: [] });
             onSuccess();
             onClose();
         }
@@ -95,6 +132,63 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                         required
                                     />
                                 </div>
+                            </div>
+
+                            <hr />
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label className="form-label fw-bold mb-0">Sistemáticos / Consumibles (Opcional)</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={handleAddAssociatedItem}
+                                    >
+                                        + Agregar
+                                    </button>
+                                </div>
+                                {formData.associated_items.map((item, index) => (
+                                    <div key={index} className="row g-2 mb-2 align-items-end border p-2 rounded bg-light">
+                                        <div className="col-7">
+                                            <label className="small text-muted">Item del Almacén</label>
+                                            <select
+                                                className="form-select form-select-sm"
+                                                value={item.warehouse_item_id}
+                                                onChange={e => handleAssociatedItemChange(index, 'warehouse_item_id', Number(e.target.value))}
+                                                required
+                                            >
+                                                <option value="0">Seleccionar ítem...</option>
+                                                {warehouseItems.map(wi => (
+                                                    <option key={wi.id} value={wi.id}>
+                                                        {wi.nombre} ({wi.categoria}) - Stock: {wi.stock_actual}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="col-3">
+                                            <label className="small text-muted">Cant.</label>
+                                            <input
+                                                type="number"
+                                                className="form-control form-control-sm"
+                                                min="1"
+                                                value={item.cantidad_sugerida}
+                                                onChange={e => handleAssociatedItemChange(index, 'cantidad_sugerida', Number(e.target.value))}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="col-2">
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger w-100"
+                                                onClick={() => handleRemoveAssociatedItem(index)}
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {formData.associated_items.length === 0 && (
+                                    <p className="text-muted small text-center mb-0">No hay ítems asociados a esta regla.</p>
+                                )}
                             </div>
                         </div>
                         <div className="modal-footer">

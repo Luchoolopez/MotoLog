@@ -94,4 +94,24 @@ export class WarehouseController {
             });
         }
     }
+
+    getHistory = async (req: AuthRequest, res: Response) => {
+        try {
+            const { id } = req.params;
+            const { global } = req.query;
+            const isGlobal = global === 'true';
+
+            const history = await this.service.getItemUsageHistory(Number(id), req.user!.id, isGlobal);
+            return res.status(200).json({
+                success: true,
+                data: history
+            });
+        } catch (error: any) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error al obtener historial de uso',
+                error: error.message
+            });
+        }
+    }
 }

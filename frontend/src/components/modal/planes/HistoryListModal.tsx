@@ -76,7 +76,7 @@ export const HistoryListModal = ({ show, onClose, motoId, itemId, taskName }: Pr
                                     <tbody>
                                         {history.map((record) => (
                                             <tr key={record.id}>
-                                                <td>{new Date(record.fecha_realizado).toLocaleDateString()}</td>
+                                                <td>{new Date(record.fecha_realizado).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
                                                 {isGlobal && <td><span className="badge bg-secondary">{record.detalle_tarea?.tarea || record.tarea_ad_hoc || 'Desconocido'}</span></td>}
                                                 <td className="fw-bold">{record.km_realizado.toLocaleString()} km</td>
                                                 <td className="text-muted small">

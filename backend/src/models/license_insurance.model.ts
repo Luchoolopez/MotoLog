@@ -10,6 +10,9 @@ export class LicenseInsurance extends Model {
     public nro_documento!: string;
     public fecha_vencimiento!: string;
     public monto!: number;
+    public cobertura!: string | null;
+    public cuota!: string | null;
+    public pagado!: boolean;
     public observaciones!: string;
 }
 
@@ -47,6 +50,19 @@ LicenseInsurance.init({
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0,
+    },
+    cobertura: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    cuota: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    pagado: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
     },
     observaciones: {
         type: DataTypes.TEXT,

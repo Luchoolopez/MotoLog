@@ -9,7 +9,9 @@ export interface LicenseInsurance {
     nro_documento: string;
     fecha_vencimiento: string;
     monto: number;
-    observaciones: string;
+    cobertura?: string | null;
+    cuota?: string | null;
+    pagado: boolean;
     moto?: {
         marca: string;
         modelo: string;
@@ -24,6 +26,9 @@ export interface CreateLicenseInsuranceDto {
     nro_documento: string;
     fecha_vencimiento: string;
     monto: number;
+    cobertura?: string;
+    cuota?: string;
+    pagado?: boolean;
     observaciones?: string;
 }
 

@@ -19,6 +19,9 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
         nro_documento: '',
         fecha_vencimiento: new Date().toISOString().split('T')[0],
         monto: 0,
+        cobertura: '',
+        cuota: '',
+        pagado: false,
         observaciones: ''
     });
 
@@ -49,6 +52,9 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                     nro_documento: initialData.nro_documento,
                     fecha_vencimiento: initialData.fecha_vencimiento.split('T')[0],
                     monto: initialData.monto,
+                    cobertura: initialData.cobertura || '',
+                    cuota: initialData.cuota || '',
+                    pagado: initialData.pagado || false,
                     observaciones: initialData.observaciones || ''
                 });
             } else {
@@ -59,6 +65,9 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                     nro_documento: '',
                     fecha_vencimiento: new Date().toISOString().split('T')[0],
                     monto: 0,
+                    cobertura: '',
+                    cuota: '',
+                    pagado: false,
                     observaciones: ''
                 });
             }
@@ -174,6 +183,47 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                         />
                                     </div>
                                 </div>
+
+                                {formData.tipo === 'Patente' && (
+                                    <>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">Cuota</label>
+                                            <input
+                                                type="text" className="form-control"
+                                                value={formData.cuota || ''}
+                                                onChange={e => setFormData({ ...formData, cuota: e.target.value })}
+                                                placeholder="Ej: Cuota 1, Cuota 2..."
+                                            />
+                                        </div>
+                                        <div className="col-md-6 d-flex align-items-end">
+                                            <div className="form-check mb-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input"
+                                                    id="pagadoCheck"
+                                                    checked={formData.pagado || false}
+                                                    onChange={e => setFormData({ ...formData, pagado: e.target.checked })}
+                                                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                />
+                                                <label className="form-check-label fw-bold ms-2" htmlFor="pagadoCheck" style={{ cursor: 'pointer' }}>
+                                                    Pagado
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {formData.tipo === 'Seguro' && (
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-bold">Cobertura</label>
+                                        <input
+                                            type="text" className="form-control"
+                                            value={formData.cobertura || ''}
+                                            onChange={e => setFormData({ ...formData, cobertura: e.target.value })}
+                                            placeholder="Ej: Terceros completo, Todo riesgo..."
+                                        />
+                                    </div>
+                                )}
 
                                 <div className="col-12">
                                     <label className="form-label fw-bold">Observaciones</label>

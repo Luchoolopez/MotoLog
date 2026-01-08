@@ -6,6 +6,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import WarehousePage from '../pages/WarehousePage';
+import { LicenseInsurancePage } from '../pages/LicenseInsurancePage';
 
 export function AppRouter() {
     return (
@@ -26,6 +27,11 @@ export function AppRouter() {
                 <Route path='/warehouse' element={
                     <ProtectedRoute>
                         <WarehousePage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/documents' element={
+                    <ProtectedRoute>
+                        <LicenseInsurancePage />
                     </ProtectedRoute>
                 } />
             </Route>

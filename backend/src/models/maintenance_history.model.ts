@@ -4,7 +4,8 @@ import { sequelize } from "../config/database";
 interface MaintenanceHistoryAttributes {
     id: number;
     moto_id: number;
-    item_plan_id: number;
+    item_plan_id: number | null;
+    tarea_ad_hoc?: string | null;
     fecha_realizado: Date;
     km_realizado: number;
     observaciones?: string | null;
@@ -18,7 +19,8 @@ export class MaintenanceHistory extends Model<MaintenanceHistoryAttributes, Main
     implements MaintenanceHistoryAttributes {
     public id!: number;
     public moto_id!: number;
-    public item_plan_id!: number;
+    public item_plan_id!: number | null;
+    public tarea_ad_hoc!: string | null;
     public fecha_realizado!: Date;
     public km_realizado!: number;
     public observaciones!: string | null;
@@ -39,7 +41,11 @@ MaintenanceHistory.init(
         },
         item_plan_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: true
+        },
+        tarea_ad_hoc: {
+            type: DataTypes.STRING,
+            allowNull: true
         },
         fecha_realizado: {
             type: DataTypes.DATE,

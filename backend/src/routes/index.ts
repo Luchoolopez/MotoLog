@@ -8,6 +8,7 @@ import CalculatorRoutes from "./calculator";
 import OdometerHistoryRoutes from "./odometerHistory.routes";
 import FuelRoutes from "./fuel";
 import warehouseRoutes from './warehouse';
+import LicenseInsuranceRoutes from './license_insurance';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/status', CalculatorRoutes);
 router.use('/odometer-history', OdometerHistoryRoutes);
 router.use('/fuel', FuelRoutes);
 router.use('/warehouse', warehouseRoutes);
+router.use('/docs', LicenseInsuranceRoutes);
 
 export default router;

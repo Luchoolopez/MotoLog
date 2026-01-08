@@ -207,39 +207,41 @@ export const RegisterServiceModal = ({ show, onClose, motoId, itemId, taskName, 
     };
 
     return (
-        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(5px)' }}>
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+                <div className="modal-content border-0 shadow-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', borderRadius: '15px' }}>
                     <div className="modal-header">
                         <h5 className="modal-title">Registrar Service: {taskName}</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <form onSubmit={handleSubmit}>
                         <div className="modal-body">
-                            <div className="mb-3">
-                                <label className="form-label">Fecha Realizado</label>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    max={new Date().toISOString().split('T')[0]}
-                                    value={formData.fecha_realizado}
-                                    onChange={e => setFormData({ ...formData, fecha_realizado: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Kilometraje Realizado</label>
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    min="0"
-                                    value={formData.km_realizado}
-                                    onChange={e => setFormData({
-                                        ...formData,
-                                        km_realizado: e.target.value === '' ? '' : Number(e.target.value)
-                                    })}
-                                    required
-                                />
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label fw-bold">Fecha Realizado</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        value={formData.fecha_realizado}
+                                        onChange={e => setFormData({ ...formData, fecha_realizado: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label fw-bold">Kilometraje Realizado</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        min="0"
+                                        value={formData.km_realizado}
+                                        onChange={e => setFormData({
+                                            ...formData,
+                                            km_realizado: e.target.value === '' ? '' : Number(e.target.value)
+                                        })}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div className="mb-3">
                                 <label className="form-label">Observaciones (Opcional)</label>
@@ -257,17 +259,19 @@ export const RegisterServiceModal = ({ show, onClose, motoId, itemId, taskName, 
                                     <small className="text-muted d-block mb-3">Se descontarán automáticamente del almacén.</small>
 
                                     {formData.consumed_items.map((item, index) => (
-                                        <div key={index} className="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom last-border-0">
-                                            <div className="flex-grow-1">
-                                                <div className="fw-bold small">{item.nombre}</div>
-                                                {item.nro_parte && <div className="text-muted extra-small">N.P: {item.nro_parte}</div>}
-                                                <div className="text-muted extra-small">Stock disp: {item.stock_actual}</div>
+                                        <div key={index} className="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom last-border-0 gap-2">
+                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                                <div className="fw-bold small text-truncate">{item.nombre}</div>
+                                                <div className="d-flex flex-wrap gap-2 mt-1">
+                                                    {item.nro_parte && <span className="badge bg-light text-dark extra-small border">N.P: {item.nro_parte}</span>}
+                                                    <span className="badge bg-light text-dark extra-small border">Stock: {item.stock_actual}</span>
+                                                </div>
                                             </div>
                                             <div className="d-flex align-items-center gap-2">
                                                 <input
                                                     type="number"
                                                     className="form-control form-control-sm text-center"
-                                                    style={{ width: '60px' }}
+                                                    style={{ width: '55px' }}
                                                     min="1"
                                                     max={item.stock_actual}
                                                     value={item.cantidad_usada}
@@ -275,7 +279,7 @@ export const RegisterServiceModal = ({ show, onClose, motoId, itemId, taskName, 
                                                 />
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-outline-danger border-0"
+                                                    className="btn btn-sm btn-outline-danger border-0 p-1"
                                                     onClick={() => handleRemoveConsumedItem(index)}
                                                 >
                                                     ✕

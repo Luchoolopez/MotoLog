@@ -13,25 +13,32 @@ export const Header: React.FC = () => {
                         MotoLog
                     </Navbar.Brand>
 
-                    {isAuthenticated && (
-                        <Nav className="me-auto ms-3">
-                            <Nav.Link as={Link} to="/" className="text-white text-uppercase small fw-bold mx-2">
-                                🏠 Garage
-                            </Nav.Link>
-                            <Nav.Link as={Link} to="/warehouse" className="text-white text-uppercase small fw-bold mx-2">
-                                📦 Almacén
-                            </Nav.Link>
-                        </Nav>
-                    )}
+                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
-                    {isAuthenticated && (
-                        <div className="d-flex align-items-center ms-auto">
-                            <span className="text-white me-3 d-none d-md-inline">Hola, {user?.name}</span>
-                            <Button variant="outline-light" size="sm" onClick={logout}>
-                                Cerrar Sesión
-                            </Button>
-                        </div>
-                    )}
+                    <Navbar.Collapse id="basic-navbar-nav">
+                        {isAuthenticated && (
+                            <Nav className="me-auto ms-lg-3">
+                                <Nav.Link as={Link} to="/" className="text-white text-uppercase small fw-bold mx-2 py-2 py-lg-0">
+                                    🏠 Garage
+                                </Nav.Link>
+                                <Nav.Link as={Link} to="/warehouse" className="text-white text-uppercase small fw-bold mx-2 py-2 py-lg-0">
+                                    📦 Almacén
+                                </Nav.Link>
+                                <Nav.Link as={Link} to="/documents" className="text-white text-uppercase small fw-bold mx-2 py-2 py-lg-0">
+                                    📄 Patente/Seguro
+                                </Nav.Link>
+                            </Nav>
+                        )}
+
+                        {isAuthenticated && (
+                            <div className="d-flex align-items-center ms-auto pt-3 pt-lg-0 border-top border-secondary border-lg-0">
+                                <span className="text-white me-3 d-none d-lg-inline">Hola, {user?.name}</span>
+                                <Button variant="outline-light" size="sm" onClick={logout} className="w-100 w-lg-auto">
+                                    Cerrar Sesión
+                                </Button>
+                            </div>
+                        )}
+                    </Navbar.Collapse>
                 </Container>
             </Navbar>
 

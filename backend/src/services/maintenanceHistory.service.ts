@@ -16,8 +16,8 @@ export class MaintenanceHistoryService {
 
             const { consumed_items, ...historyData } = data;
 
-            if (!historyData.moto_id || !historyData.item_plan_id) {
-                throw new Error('Faltan campos obligatorios: moto_id o item_plan_id');
+            if (!historyData.moto_id || (!historyData.item_plan_id && !historyData.tarea_ad_hoc)) {
+                throw new Error('Faltan campos obligatorios: moto_id y (item_plan_id o tarea_ad_hoc)');
             }
 
             // 1. Crear el registro de historial

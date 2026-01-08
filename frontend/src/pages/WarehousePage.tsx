@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { WarehouseService, type WarehouseItem } from "../services/warehouse.service";
 import { WarehouseItemModal } from "../components/modal/warehouse/WarehouseItemModal";
 import { ItemUsageHistoryModal } from "../components/modal/warehouse/ItemUsageHistoryModal";
+import { InstallItemModal } from "../components/modal/warehouse/InstallItemModal";
 import { useToast } from "../context/ToastContext";
 
 const WarehousePage = () => {
@@ -14,6 +15,8 @@ const WarehousePage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [showInstallModal, setShowInstallModal] = useState(false);
+    const [itemToInstall, setItemToInstall] = useState<WarehouseItem | null>(null);
 
     const { showToast } = useToast();
 
@@ -41,6 +44,11 @@ const WarehousePage = () => {
     const handleHistory = (item: WarehouseItem) => {
         setSelectedItem(item);
         setShowHistoryModal(true);
+    };
+
+    const handleInstall = (item: WarehouseItem) => {
+        setItemToInstall(item);
+        setShowInstallModal(true);
     };
 
     const handleDelete = async (id: number) => {
@@ -131,15 +139,15 @@ const WarehousePage = () => {
                 <div className="col-md-12">
                     <div className="card border-0 shadow-sm bg-dark text-white p-3 mb-3">
                         <div className="row align-items-center g-3">
-                            <div className="col-lg-4">
-                                <div className="d-flex gap-4">
+                            <div className="col-sm-6 col-lg-4">
+                                <div className="d-flex gap-3 gap-md-4">
                                     <div>
                                         <small className="d-block opacity-75">Inversión Total</small>
-                                        <h4 className="mb-0">${totalInversion.toLocaleString()}</h4>
+                                        <h4 className="mb-0 fs-5 fs-md-4">${totalInversion.toLocaleString()}</h4>
                                     </div>
-                                    <div>
-                                        <small className="d-block opacity-75">Items Diferentes</small>
-                                        <h4 className="mb-0">{groups.length}</h4>
+                                    <div className="border-start ps-3 ps-md-4">
+                                        <small className="d-block opacity-75">Diferentes</small>
+                                        <h4 className="mb-0 fs-5 fs-md-4">{groups.length}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -155,15 +163,15 @@ const WarehousePage = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-lg-2 text-end">
-                                <div className="btn-group" role="group">
+                            <div className="col-lg-5 col-xl-2 text-md-end">
+                                <div className="btn-group w-100" role="group">
                                     {['All', 'Repuesto', 'Accesorio', 'Sistemático'].map((cat) => (
                                         <button
                                             key={cat}
-                                            className={`btn btn-sm ${filter === cat ? 'btn-light' : 'btn-outline-light'}`}
+                                            className={`btn btn-sm py-2 py-md-1 ${filter === cat ? 'btn-light' : 'btn-outline-light'}`}
                                             onClick={() => setFilter(cat as any)}
                                         >
-                                            {cat === 'All' ? 'Todos' : cat + 's'}
+                                            {cat === 'All' ? 'Todos' : (cat === 'Sistemático' ? 'Sist.' : cat + 's')}
                                         </button>
                                     ))}
                                 </div>
@@ -175,7 +183,7 @@ const WarehousePage = () => {
                             </div>
                             <div className="col-md-3">
                                 <div className="input-group input-group-sm">
-                                    <span className="input-group-text bg-transparent text-white border-secondary">Desde</span>
+                                    <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Desde</span>
                                     <input
                                         type="date"
                                         className="form-control bg-dark text-white border-secondary"
@@ -186,7 +194,7 @@ const WarehousePage = () => {
                             </div>
                             <div className="col-md-3">
                                 <div className="input-group input-group-sm">
-                                    <span className="input-group-text bg-transparent text-white border-secondary">Hasta</span>
+                                    <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Hasta</span>
                                     <input
                                         type="date"
                                         className="form-control bg-dark text-white border-secondary"
@@ -221,94 +229,120 @@ const WarehousePage = () => {
                     <h3 className="text-muted mb-0">No hay items registrados</h3>
                 </div>
             ) : (
-                <div className="accordion shadow-sm rounded-4 overflow-hidden" id="warehouseAccordion">
+                <div className="d-flex flex-column gap-3" id="warehouseAccordion">
                     {groups.map((group, gIdx) => (
-                        <div className="accordion-item border-0 border-bottom" key={gIdx}>
-                            <h2 className="accordion-header">
+                        <div className="card border-0 shadow-sm rounded-3 overflow-hidden" key={gIdx} style={{ border: '1px solid #e9ecef' }}>
+                            <div className="card-header bg-white p-0 border-0">
                                 <button
-                                    className="accordion-button bg-white py-3 shadow-none"
+                                    className="btn btn-link w-100 text-decoration-none text-dark p-3 text-start d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${gIdx}`}
                                     aria-expanded="true"
                                 >
-                                    <div className="container-fluid p-0">
-                                        <div className="row align-items-center g-2">
-                                            <div className="col-md-5">
-                                                <div className="d-flex align-items-center gap-2">
-                                                    <span className={`badge rounded-pill ${group.categoria === 'Repuesto' ? 'bg-primary' :
-                                                        group.categoria === 'Accesorio' ? 'bg-info' : 'bg-warning text-dark'
-                                                        }`}>
-                                                        {group.categoria}
+                                    <div className="flex-grow-1 w-100">
+                                        {/* Línea 1: Categoría, Nombre y N/P */}
+                                        <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                            <span className={`badge rounded-pill px-3 ${group.categoria === 'Repuesto' ? 'bg-primary bg-opacity-10 text-primary' :
+                                                group.categoria === 'Accesorio' ? 'bg-info bg-opacity-10 text-info' : 'bg-warning bg-opacity-10 text-warning'
+                                                }`}>
+                                                {group.categoria}
+                                            </span>
+                                            <h5 className="mb-0 fw-bold flex-grow-1">{group.nombre}</h5>
+                                            {group.nro_parte && (
+                                                <span className="badge bg-dark px-2 py-1 rounded-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>
+                                                    N/P: {group.nro_parte}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Línea 2: Modelo y Stock Info */}
+                                        <div className="d-flex flex-column flex-md-row gap-2 gap-md-3 align-items-start align-items-md-center">
+                                            <small className="text-muted">{group.modelo_moto || 'Compatible con todas'}</small>
+                                            <div className="vr d-none d-md-block" style={{ height: '15px' }}></div>
+                                            <div className="d-flex flex-wrap gap-3">
+                                                <div className="d-flex align-items-center gap-1">
+                                                    <span className="text-muted small text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>Stock:</span>
+                                                    <span className={`fw-bold ${group.stockActual > 0 ? 'text-success' : 'text-danger'}`}>
+                                                        {group.stockActual > 0 ? group.stockActual : 'SIN STOCK'}
                                                     </span>
-                                                    <span className="fw-bold fs-5 text-dark">{group.nombre}</span>
-                                                    {group.nro_parte && <code className="ms-2">{group.nro_parte}</code>}
                                                 </div>
-                                                <small className="text-muted">{group.modelo_moto || 'Compatible con todas'}</small>
-                                            </div>
-                                            <div className="col-md-2 text-center border-start border-end">
-                                                <small className="d-block text-muted text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Comprado</small>
-                                                <span className="fs-5 fw-bold">{group.totalComprado}</span>
-                                            </div>
-                                            <div className="col-md-2 text-center border-end">
-                                                <small className="d-block text-muted text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>En Stock</small>
-                                                {group.stockActual > 0 ? (
-                                                    <span className="fs-4 fw-bold text-success">{group.stockActual}</span>
-                                                ) : (
-                                                    <span className="badge bg-danger">SIN STOCK</span>
-                                                )}
-                                            </div>
-                                            <div className="col-md-3 text-end pe-4">
-                                                <button
-                                                    className="btn btn-sm btn-info text-white shadow-sm"
-                                                    onClick={(e) => { e.stopPropagation(); handleHistory(group.batches[0]); }}
-                                                >
-                                                    🕓 Historial Global
-                                                </button>
+                                                <div className="d-flex align-items-center gap-1">
+                                                    <span className="text-muted small text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>Comprado:</span>
+                                                    <span className="fw-bold">{group.totalComprado}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Botones de acción */}
+                                    <div className="d-flex gap-2 align-items-center align-self-end align-self-md-center">
+                                        <button
+                                            className="btn btn-sm btn-outline-secondary border-0 rounded-circle p-2"
+                                            onClick={(e) => { e.stopPropagation(); handleHistory(group.batches[0]); }}
+                                            title="Ver Historial"
+                                        >
+                                            🕓
+                                        </button>
+                                        <span className="fs-5 opacity-25">▾</span>
+                                    </div>
                                 </button>
-                            </h2>
-                            <div id={`collapse-${gIdx}`} className="accordion-collapse collapse show">
-                                <div className="accordion-body p-0 bg-light bg-opacity-50">
+                            </div>
+                            <div id={`collapse-${gIdx}`} className="collapse show border-top">
+                                <div className="card-body p-0 bg-light bg-opacity-25">
                                     <div className="table-responsive">
-                                        <table className="table table-sm table-borderless align-middle mb-0">
-                                            <thead className="small text-muted text-uppercase border-bottom">
-                                                <tr>
-                                                    <th className="ps-4 py-2">Fecha Compra</th>
-                                                    <th className="py-2">Lugar</th>
-                                                    <th className="text-end py-2">Precio Un.</th>
-                                                    <th className="text-center py-2">Cant. Compra</th>
-                                                    <th className="text-center py-2">Cant. Stock</th>
-                                                    <th className="text-end pe-4 py-2">Acciones</th>
+                                        <table className="table table-sm table-hover align-middle mb-0">
+                                            <thead className="bg-white border-bottom">
+                                                <tr style={{ fontSize: '0.75rem' }}>
+                                                    <th className="ps-4 py-2 text-muted text-uppercase fw-bold">Fecha</th>
+                                                    <th className="py-2 text-muted text-uppercase fw-bold">Lugar</th>
+                                                    <th className="text-end py-2 text-muted text-uppercase fw-bold">Precio</th>
+                                                    <th className="text-center py-2 text-muted text-uppercase fw-bold">Stock</th>
+                                                    <th className="text-end pe-4 py-2 text-muted text-uppercase fw-bold">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {group.batches.sort((a: any, b: any) => new Date(b.fecha_compra).getTime() - new Date(a.fecha_compra).getTime()).map((item: WarehouseItem) => (
-                                                    <tr key={item.id} className="border-bottom-dashed">
+                                                    <tr key={item.id} className="bg-white hover:bg-light transition-colors">
                                                         <td className="ps-4 py-3">{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
-                                                        <td className="py-3">{item.lugar_compra || '-'}</td>
-                                                        <td className="text-end fw-bold py-3">${item.precio_compra.toLocaleString()}</td>
+                                                        <td className="py-3 text-muted">{item.lugar_compra || '-'}</td>
+                                                        <td className="text-end fw-bold py-3 text-primary">${item.precio_compra.toLocaleString()}</td>
                                                         <td className="text-center py-3">
-                                                            <span className="badge bg-secondary">{item.cantidad}</span>
-                                                        </td>
-                                                        <td className="text-center py-3">
-                                                            <span className={`badge ${item.stock_actual > 0 ? 'bg-success' : 'bg-danger'}`}>{item.stock_actual}</span>
+                                                            <div className="d-flex flex-column align-items-center">
+                                                                <span className={`badge rounded-pill ${item.stock_actual > 0 ? 'bg-success' : 'bg-danger'}`}>
+                                                                    {item.stock_actual} / {item.cantidad}
+                                                                </span>
+                                                            </div>
                                                         </td>
                                                         <td className="text-end pe-4 py-3">
-                                                            <button
-                                                                className="btn btn-xs btn-outline-primary me-1 py-0 px-2 shadow-sm"
-                                                                onClick={() => handleEdit(item)}
-                                                            >
-                                                                ✏️
-                                                            </button>
-                                                            <button
-                                                                className="btn btn-xs btn-outline-danger py-0 px-2 shadow-sm"
-                                                                onClick={() => handleDelete(item.id)}
-                                                            >
-                                                                🗑️
-                                                            </button>
+                                                            <div className="btn-group shadow-sm rounded-2 overflow-hidden d-flex flex-nowrap">
+                                                                <button
+                                                                    className="btn btn-sm btn-success border-0 py-1 px-2"
+                                                                    onClick={() => handleInstall(item)}
+                                                                    title="Instalar Repuesto"
+                                                                    disabled={item.stock_actual === 0}
+                                                                    style={{ fontSize: '0.75rem' }}
+                                                                >
+                                                                    <span className="d-none d-md-inline">🛠️ Instalar</span>
+                                                                    <span className="d-md-none">🛠️</span>
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-sm btn-primary border-0 py-1 px-2"
+                                                                    onClick={() => handleEdit(item)}
+                                                                    title="Editar"
+                                                                    style={{ fontSize: '0.75rem' }}
+                                                                >
+                                                                    ✏️
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-sm btn-danger border-0 py-1 px-2"
+                                                                    onClick={() => handleDelete(item.id)}
+                                                                    title="Eliminar"
+                                                                    style={{ fontSize: '0.75rem' }}
+                                                                >
+                                                                    🗑️
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -334,6 +368,13 @@ const WarehousePage = () => {
                 onClose={() => setShowHistoryModal(false)}
                 itemId={selectedItem?.id || null}
                 itemName={selectedItem?.nombre || ''}
+            />
+
+            <InstallItemModal
+                show={showInstallModal}
+                onClose={() => setShowInstallModal(false)}
+                onSuccess={fetchItems}
+                item={itemToInstall}
             />
         </div>
     );

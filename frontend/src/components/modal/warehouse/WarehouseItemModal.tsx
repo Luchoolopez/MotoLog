@@ -78,9 +78,9 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
     };
 
     return (
-        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1070 }}>
-            <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px' }}>
+        <div className="modal d-block px-2" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1070 }}>
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px', overflow: 'hidden' }}>
                     <div className="modal-header bg-dark text-white" style={{ borderTopLeftRadius: '15px', borderTopRightRadius: '15px' }}>
                         <h5 className="modal-title">
                             {initialData ? '📝 Editar Item' : '📦 Nuevo Item en Almacén'}

@@ -8,6 +8,7 @@ import { FuelRecord } from "./fuel_record.model";
 import { WarehouseItem } from "./warehouse_item.model";
 import { ItemPlanWarehouse } from "./item_plan_warehouse.model";
 import { MaintenanceHistoryConsumption } from "./maintenance_history_consumption.model";
+import { LicenseInsurance } from "./license_insurance.model";
 
 
 export const setupAssociations = () => {
@@ -142,5 +143,23 @@ export const setupAssociations = () => {
     MaintenanceHistoryConsumption.belongsTo(WarehouseItem, {
         foreignKey: 'warehouse_item_id',
         as: 'item'
+    });
+
+    // --- 12. User/Moto <-> LicenseInsurance ---
+    User.hasMany(LicenseInsurance, {
+        foreignKey: 'user_id',
+        as: 'documentacion'
+    });
+    LicenseInsurance.belongsTo(User, {
+        foreignKey: 'user_id',
+        as: 'usuario'
+    });
+    Motorcycle.hasMany(LicenseInsurance, {
+        foreignKey: 'moto_id',
+        as: 'documentos'
+    });
+    LicenseInsurance.belongsTo(Motorcycle, {
+        foreignKey: 'moto_id',
+        as: 'moto'
     });
 };

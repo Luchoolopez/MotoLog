@@ -78,51 +78,53 @@ export const MotoDashboard = () => {
     return (
         <div className="container mt-4">
             <div className="card bg-dark text-white mb-4 shadow">
-                <div className="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <Link to="/" className="text-white-50 text-decoration-none mb-1 d-block">← Volver al Garage</Link>
-                        <h2 className="mb-0">{moto.marca} {moto.modelo}</h2>
-                        <div className="d-flex align-items-center gap-2 mt-2">
-                            <span className="badge bg-light text-dark">{moto.patente}</span>
-                            {averageConsumption !== null && (
-                                <span className="badge bg-success" title={`Consumo: ${averageConsumption.kmPerLiter.toFixed(2)} km/l | ${averageConsumption.litersPer100Km.toFixed(2)} L/100km`}>
-                                    ⛽ {averageConsumption.kmPerLiter.toFixed(1)} km/l | {averageConsumption.litersPer100Km.toFixed(1)} L/100km
-                                </span>
-                            )}
+                <div className="card-body">
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                        <div className="w-100">
+                            <Link to="/" className="text-white-50 text-decoration-none mb-2 d-inline-block">← Volver al Garage</Link>
+                            <h2 className="mb-0 fs-3 fs-md-2">{moto.marca} {moto.modelo}</h2>
+                            <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                                <span className="badge bg-light text-dark">{moto.patente}</span>
+                                {averageConsumption !== null && (
+                                    <span className="badge bg-success" title={`Consumo: ${averageConsumption.kmPerLiter.toFixed(2)} km/l | ${averageConsumption.litersPer100Km.toFixed(2)} L/100km`}>
+                                        ⛽ {averageConsumption.kmPerLiter.toFixed(1)} km/l | {averageConsumption.litersPer100Km.toFixed(1)} L/100km
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                    <div className="text-end">
-                        <div className="display-6">{moto.km_actual.toLocaleString()} km</div>
-                        <div className="d-flex gap-2 justify-content-end mt-2">
-                            <button
-                                className="btn btn-sm btn-outline-light"
-                                onClick={() => setShowOdometerHistoryModal(true)}
-                                title="Ver historial de kilómetros"
-                            >
-                                🕓 Historial
-                            </button>
-                            <button
-                                className="btn btn-sm btn-light"
-                                onClick={() => setShowKmModal(true)} // Abrir modal KM
-                            >
-                                ✏️ Actualizar Km
-                            </button>
+                        <div className="text-md-end w-100 w-md-auto border-top border-secondary pt-3 pt-md-0 border-md-0 mt-2 mt-md-0">
+                            <div className="display-6 fs-2 fs-md-1 fw-bold">{moto.km_actual.toLocaleString()} <small className="fs-6 opacity-75">km</small></div>
+                            <div className="d-flex gap-2 justify-content-start justify-content-md-end mt-2">
+                                <button
+                                    className="btn btn-sm btn-outline-light flex-grow-1 flex-md-grow-0"
+                                    onClick={() => setShowOdometerHistoryModal(true)}
+                                    title="Ver historial de kilómetros"
+                                >
+                                    🕓 Historial
+                                </button>
+                                <button
+                                    className="btn btn-sm btn-light flex-grow-1 flex-md-grow-0"
+                                    onClick={() => setShowKmModal(true)} // Abrir modal KM
+                                >
+                                    ✏️ Actualizar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4 className="mb-0">Estado de Mantenimiento</h4>
-                <div className="d-flex gap-2">
-                    <button className="btn btn-outline-success btn-sm" onClick={() => setShowFuelHistoryModal(true)}>
-                        ⛽ Historial Combustible
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4 gap-3">
+                <h4 className="mb-0 fs-5 fs-md-4 fw-bold">Estado de Mantenimiento</h4>
+                <div className="d-flex gap-2 flex-wrap w-100 w-md-auto">
+                    <button className="btn btn-outline-success btn-sm flex-grow-1" onClick={() => setShowFuelHistoryModal(true)}>
+                        ⛽ Historial
                     </button>
-                    <button className="btn btn-success btn-sm" onClick={() => setShowFuelFormModal(true)}>
-                        + Cargar Nafta
+                    <button className="btn btn-success btn-sm flex-grow-1" onClick={() => setShowFuelFormModal(true)}>
+                        + Nafta
                     </button>
-                    <button className="btn btn-primary btn-sm" onClick={() => setShowItemModal(true)}>
-                        + Agregar Tarea
+                    <button className="btn btn-primary btn-sm flex-grow-1" onClick={() => setShowItemModal(true)}>
+                        + Tarea
                     </button>
                 </div>
             </div>
@@ -157,24 +159,22 @@ export const MotoDashboard = () => {
                     }
 
                     return (
-                        <div key={item.item_id} className={`list-group-item p-3 ${borderClass} ${bgClass}`}>
-                            <div className="d-flex w-100 justify-content-between align-items-center">
-                                <div>
-                                    <h5 className="mb-1 d-flex align-items-center gap-2">
-                                        {icon} {item.tarea}
+                        <div key={item.item_id} className={`list-group-item p-3 ${borderClass} ${bgClass} shadow-sm mb-2 rounded`}>
+                            <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center gap-3">
+                                <div className="w-100">
+                                    <h5 className="mb-1 d-flex align-items-center gap-2 fs-6 fs-md-5">
+                                        <span className="fs-4">{icon}</span> {item.tarea}
                                     </h5>
                                     <div className="text-muted small mt-1">
                                         {item.estado === 'OK' ? (
-                                            <span>
+                                            <span className="d-block d-md-inline">
                                                 Te quedan <strong>{item.km_restantes} km</strong>
-                                                {/* Hidden if dias_restantes is basically infinity (9999) */}
                                                 {item.dias_restantes < 3650 && item.dias_restantes > 0 && (
                                                     <span> o <strong>{item.dias_restantes} días</strong></span>
                                                 )}
                                             </span>
                                         ) : (
-                                            <span className="text-danger fw-bold">
-                                                {/* Aqui corregimos visualmente si el backend manda negativo */}
+                                            <span className="text-danger fw-bold d-block d-md-inline">
                                                 {item.km_restantes < 0
                                                     ? `¡Te pasaste por ${Math.abs(item.km_restantes)} km!`
                                                     : (item.dias_restantes < 3650 && item.dias_restantes < 0)
@@ -185,9 +185,9 @@ export const MotoDashboard = () => {
                                     </div>
                                 </div>
 
-                                <div className="d-flex gap-2 align-items-center">
+                                <div className="d-flex gap-2 align-items-center w-100 w-md-auto justify-content-end border-top border-md-0 pt-2 pt-md-0">
                                     <button
-                                        className="btn btn-outline-info btn-sm"
+                                        className="btn btn-outline-info btn-sm px-3"
                                         title="Ver Historial"
                                         onClick={() => {
                                             setSelectedItemForHistory({ id: item.item_id, task: item.tarea });
@@ -197,11 +197,9 @@ export const MotoDashboard = () => {
                                         Ver 👁️
                                     </button>
 
-                                    <button className="btn btn-outline-danger btn-sm"
+                                    <button className="btn btn-outline-danger btn-sm border-0"
+                                        title="Borrar Tarea"
                                         onClick={async () => {
-                                            // Using standard confirm as placeholder, ideally use toast/modal but specific request was just replace alerts
-                                            // keeping this simple for now or using the confirm replacement if requested later.
-                                            // The user hasn't complained about this confirm specifically yet.
                                             if (confirm('¿Borrar regla?')) {
                                                 await deleteItem(item.item_id);
                                                 fetchDashboard();
@@ -211,7 +209,7 @@ export const MotoDashboard = () => {
                                     </button>
 
                                     <button
-                                        className={`btn btn-sm fw-bold ${btnClass}`}
+                                        className={`btn btn-sm fw-bold flex-grow-1 flex-md-grow-0 px-3 ${btnClass}`}
                                         onClick={() => {
                                             setSelectedItemForService({ id: item.item_id, task: item.tarea });
                                             setShowRegisterModal(true);

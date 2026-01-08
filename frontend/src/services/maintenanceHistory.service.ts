@@ -2,7 +2,8 @@ import apiClient from '../types/apiClient';
 
 export interface CreateHistoryDto {
     moto_id: number;
-    item_plan_id: number;
+    item_plan_id?: number | null;
+    tarea_ad_hoc?: string;
     fecha_realizado: string;
     km_realizado: number;
     observaciones?: string;

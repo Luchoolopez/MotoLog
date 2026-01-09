@@ -39,9 +39,25 @@ export const GaragePage = () => {
                             Planes
                         </Link>
                         <button
-                            className="btn btn-primary"
-                            onClick={() => setShowModal(true)}>
-                            + Nueva Moto
+                            className="btn p-0 border-0"
+                            onClick={() => setShowModal(true)}
+                            style={{ transition: 'transform 0.2s' }}
+                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            title="Agregar Nueva Moto"
+                        >
+                            <img
+                                src="/assets/agregar_moto.png"
+                                alt="Nueva Moto"
+                                className="rounded-circle shadow-lg"
+                                style={{
+                                    height: '70px',
+                                    width: '70px',
+                                    objectFit: 'cover',
+                                    border: '3px solid white',
+                                    backgroundColor: 'white'
+                                }}
+                            />
                         </button>
                     </div>
                 </div>

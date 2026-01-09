@@ -7,6 +7,7 @@ export interface AuthRequest extends Request {
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+    console.log(`[DEBUG] AuthMiddleware: Header present? ${!!authHeader}`); // LOG
     if (!authHeader) {
         return res.status(401).json({ error: 'No token provided' });
     }
@@ -18,9 +19,11 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
     try {
         const decoded = AuthService.verifyToken(token);
+        console.log(`[DEBUG] AuthMiddleware: Token verified for User ID: ${decoded.id}`); // LOG
         req.user = decoded;
         next();
     } catch (error) {
+        console.error(`[DEBUG] AuthMiddleware: Verification failed:`, error);
         res.status(401).json({ error: 'Invalid token' });
     }
 };

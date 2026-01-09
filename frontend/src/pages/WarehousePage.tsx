@@ -125,6 +125,7 @@ const WarehousePage = () => {
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/galpon.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            backgroundAttachment: 'fixed',
             minHeight: '100vh',
             color: 'white'
         }}>
@@ -143,12 +144,12 @@ const WarehousePage = () => {
                         title="Cargar Compra"
                     >
                         <img
-                            src="/assets/carrito_simple.png"
+                            src="/assets/carrito_compras.png"
                             alt="Cargar Compra"
                             className="rounded-circle shadow-lg"
                             style={{
-                                height: '80px',
-                                width: '80px',
+                                height: '70px',
+                                width: '70px',
                                 objectFit: 'cover',
                                 border: '3px solid white',
                                 backgroundColor: 'white' // Added background color for transparency handling if needed

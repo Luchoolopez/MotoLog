@@ -24,9 +24,6 @@ export const Header: React.FC = () => {
                                 <Nav.Link as={Link} to="/warehouse" className="text-white text-uppercase small fw-bold mx-2 py-2 py-lg-0">
                                     📦 Almacén
                                 </Nav.Link>
-                                <Nav.Link as={Link} to="/documents" className="text-white text-uppercase small fw-bold mx-2 py-2 py-lg-0">
-                                    📄 Patente/Seguro
-                                </Nav.Link>
                             </Nav>
                         )}
 

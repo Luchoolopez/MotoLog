@@ -179,7 +179,9 @@ export const MotoDashboard = () => {
                                                     ? `¡Te pasaste por ${Math.abs(item.km_restantes)} km!`
                                                     : (item.dias_restantes < 3650 && item.dias_restantes < 0)
                                                         ? `¡Vencido hace ${Math.abs(item.dias_restantes)} día${Math.abs(item.dias_restantes) === 1 ? '' : 's'}!`
-                                                        : `Faltan ${item.km_restantes} km.`}
+                                                        : (item.dias_restantes < 3650)
+                                                            ? `Faltan ${item.km_restantes} km o ${item.dias_restantes} días.`
+                                                            : `Faltan ${item.km_restantes} km.`}
                                             </span>
                                         )}
                                     </div>

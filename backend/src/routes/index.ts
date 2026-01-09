@@ -21,6 +21,6 @@ router.use('/status', CalculatorRoutes);
 router.use('/odometer-history', OdometerHistoryRoutes);
 router.use('/fuel', FuelRoutes);
 router.use('/warehouse', warehouseRoutes);
-router.use('/docs', LicenseInsuranceRoutes);
+// router.use('/docs', LicenseInsuranceRoutes);
 
 export default router;

@@ -14,7 +14,12 @@ export const LicenseInsurancePage = () => {
         try {
             setLoading(true);
             const data = await LicenseInsuranceService.getAll();
-            setRecords(data);
+            if (Array.isArray(data)) {
+                setRecords(data);
+            } else {
+                setRecords([]);
+                console.error("Data received is not an array:", data);
+            }
         } catch (error) {
             console.error("Error fetching documents", error);
             showToast('Error al cargar documentos', 'error');

@@ -7,14 +7,24 @@ export const LicenseInsuranceController = {
     getAll: async (req: AuthRequest, res: Response) => {
         try {
             const userId = req.user?.id;
+            // console.log(`[DEBUG] LicenseInsuranceController.getAll called for user: ${userId}`);
+
+            // SANITY CHECK START
+            /*
             const records = await LicenseInsurance.findAll({
                 where: { user_id: userId },
                 include: [{ model: Motorcycle, as: 'moto', attributes: ['marca', 'modelo', 'patente'] }],
                 order: [['fecha_vencimiento', 'ASC']]
             });
-            res.json(records);
+            console.log(`[DEBUG] LicenseInsuranceController.getAll records found: ${records.length}`);
+            res.json({ success: true, data: records });
+            */
+            console.log('[DEBUG] Sanity check: returning empty list');
+            res.json({ success: true, data: [] });
+            // SANITY CHECK END
         } catch (error: any) {
-            res.status(500).json({ message: error.message });
+            console.error("Error in LicenseInsuranceController.getAll:", error);
+            res.status(500).json({ success: false, message: error.message });
         }
     },
 
@@ -26,9 +36,10 @@ export const LicenseInsuranceController = {
                 where: { moto_id: motoId, user_id: userId },
                 order: [['fecha_vencimiento', 'ASC']]
             });
-            res.json(records);
+            res.json({ success: true, data: records });
         } catch (error: any) {
-            res.status(500).json({ message: error.message });
+            console.error("Error in LicenseInsuranceController.getByMoto:", error);
+            res.status(500).json({ success: false, message: error.message });
         }
     },
 
@@ -39,9 +50,10 @@ export const LicenseInsuranceController = {
                 ...req.body,
                 user_id: userId
             });
-            res.status(201).json(record);
+            res.status(201).json({ success: true, data: record });
         } catch (error: any) {
-            res.status(400).json({ message: error.message });
+            console.error("Error in LicenseInsuranceController.create:", error);
+            res.status(400).json({ success: false, message: error.message });
         }
     },
 
@@ -52,13 +64,14 @@ export const LicenseInsuranceController = {
             const record = await LicenseInsurance.findOne({ where: { id, user_id: userId } });
 
             if (!record) {
-                return res.status(404).json({ message: "Registro no encontrado" });
+                return res.status(404).json({ success: false, message: "Registro no encontrado" });
             }
 
             await record.update(req.body);
-            res.json(record);
+            res.json({ success: true, data: record });
         } catch (error: any) {
-            res.status(400).json({ message: error.message });
+            console.error("Error in LicenseInsuranceController.update:", error);
+            res.status(400).json({ success: false, message: error.message });
         }
     },
 
@@ -69,13 +82,14 @@ export const LicenseInsuranceController = {
             const record = await LicenseInsurance.findOne({ where: { id, user_id: userId } });
 
             if (!record) {
-                return res.status(404).json({ message: "Registro no encontrado" });
+                return res.status(404).json({ success: false, message: "Registro no encontrado" });
             }
 
             await record.destroy();
-            res.json({ message: "Registro eliminado" });
+            res.json({ success: true, message: "Registro eliminado" });
         } catch (error: any) {
-            res.status(500).json({ message: error.message });
+            console.error("Error in LicenseInsuranceController.delete:", error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 };

@@ -87,6 +87,35 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div className="row mt-3">
+                                        <div className="col-md-4 mb-2 mb-md-0">
+                                            <div className="card bg-secondary text-white text-center p-3 shadow-sm h-100">
+                                                <small className="text-white-50">KM Recorridos</small>
+                                                <h4 className="mb-0">
+                                                    {history.length > 1
+                                                        ? (Math.max(...history.map(h => h.km_momento)) - Math.min(...history.map(h => h.km_momento))).toLocaleString()
+                                                        : '0'} km
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4 mb-2 mb-md-0">
+                                            <div className="card bg-dark text-white text-center p-3 shadow-sm h-100">
+                                                <small className="text-white-50">Total Litros</small>
+                                                <h4 className="mb-0">
+                                                    {history.reduce((acc, curr) => acc + Number(curr.litros), 0).toFixed(1)} L
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4">
+                                            <div className="card bg-primary text-white text-center p-3 shadow-sm h-100">
+                                                <small className="text-white-50">Gasto Total</small>
+                                                <h4 className="mb-0">
+                                                    ${history.reduce((acc, curr) => acc + Number(curr.total), 0).toLocaleString()}
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Table Section - Scrollable */}

@@ -108,7 +108,7 @@ export class MaintenanceHistoryService {
                 {
                     model: ItemsPlan,
                     as: 'detalle_tarea',
-                    attributes: ['tarea', 'intervalo_km']
+                    attributes: ['tarea', 'intervalo_km', 'tipo']
                 }
             ],
             order: [['fecha_realizado', 'DESC']]

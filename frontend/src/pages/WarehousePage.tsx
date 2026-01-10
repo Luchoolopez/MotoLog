@@ -167,7 +167,7 @@ const WarehousePage = () => {
 
     return (
         <div className="container-fluid flex-grow-1" style={{
-            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/galpon.png')",
+            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/galpon.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
@@ -183,9 +183,9 @@ const WarehousePage = () => {
                             <p className="text-white-50">Gestiona tus repuestos, accesorios y sistemáticos</p>
                         </div>
                         <button
-                            className="btn p-0 border-0"
+                            className="btn p-0 border-0 d-flex justify-content-center align-items-center"
                             onClick={() => { setSelectedItem(null); setShowModal(true); }}
-                            style={{ transition: 'transform 0.2s' }}
+                            style={{ transition: 'transform 0.2s', width: '70px', height: '70px' }}
                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             title="Cargar Compra"
@@ -195,11 +195,10 @@ const WarehousePage = () => {
                                 alt="Cargar Compra"
                                 className="rounded-circle shadow-lg"
                                 style={{
-                                    height: '70px',
-                                    width: '70px',
-                                    objectFit: 'cover',
-                                    border: '3px solid white',
-                                    backgroundColor: 'white' // Added background color for transparency handling if needed
+                                    height: '100%',
+                                    width: '100%',
+                                    objectFit: 'contain',
+                                    backgroundColor: 'white'
                                 }}
                             />
                         </button>

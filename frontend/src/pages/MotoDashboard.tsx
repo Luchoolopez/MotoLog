@@ -73,11 +73,64 @@ export const MotoDashboard = () => {
         }
     };
 
+    const handleExportReport = async () => {
+        if (!moto) return;
+
+        try {
+            const history = await MaintenanceHistoryService.getByMotoId(motoId);
+
+            // Generar CSV
+            // Usamos punto y coma (;) que es más compatible con Excel en español/Latinoamérica
+            // Y agregamos el BOM (\uFEFF) para que reconozca los acentos (UTF-8)
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+
+            // Sección 1: Estado del Plan
+            csvContent += "ESTADO ACTUAL DEL PLAN DE MANTENIMIENTO\n";
+            csvContent += "Tarea;Tipo;Estado;KM Limite;KM Restantes;Fecha Limite;Dias Restantes\n";
+
+            statuses.forEach(item => {
+                const tipo = item.tipo || '-';
+                const estado = item.estado;
+                const kmLimite = item.km_limite || '-';
+                const kmRestantes = item.intervalo_km > 0 ? item.km_restantes : '-';
+                const fechaLimite = item.fecha_limite || '-';
+                const diasRestantes = item.intervalo_meses > 0 ? item.dias_restantes : '-';
+
+                csvContent += `"${item.tarea}";"${tipo}";"${estado}";"${kmLimite}";"${kmRestantes}";"${fechaLimite}";"${diasRestantes}"\n`;
+            });
+
+            csvContent += "\n\nHISTORIAL DE SERVICIOS REALIZADOS\n";
+            csvContent += "Fecha;KM;Tarea;Tipo Servicio;Observaciones\n";
+
+            history.forEach((h: any) => {
+                const fecha = new Date(h.fecha_realizado).toLocaleDateString();
+                const tarea = h.detalle_tarea ? h.detalle_tarea.tarea : (h.tarea_ad_hoc || 'Tarea desconocida');
+                const tipo = h.detalle_tarea ? h.detalle_tarea.tipo : 'Ad-hoc';
+                const obs = h.observaciones ? h.observaciones.replace(/"/g, '""') : '';
+
+                csvContent += `"${fecha}";"${h.km_realizado}";"${tarea}";"${tipo}";"${obs}"\n`;
+            });
+
+            // Descargar
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Reporte_Moto_${moto.patente}_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error("Error exportando reporte", error);
+            showToast("Error al generar el reporte", "error");
+        }
+    };
+
     if (loading || !moto) return <div className="p-5 text-center">Analizando moto... 🔧</div>;
 
     return (
         <div className="container-fluid flex-grow-1" style={{
-            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('/assets/garage-bg.png')",
+            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/garage-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
@@ -129,6 +182,9 @@ export const MotoDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4 gap-3">
                     <h4 className="mb-0 fs-5 fs-md-4 fw-bold">Estado de Mantenimiento</h4>
                     <div className="d-flex gap-2 flex-wrap w-100 w-md-auto">
+                        <button className="btn btn-outline-light btn-sm flex-grow-1" onClick={handleExportReport} title="Descargar reporte completo">
+                            📥 Reporte
+                        </button>
                         <button className="btn btn-outline-success btn-sm flex-grow-1" onClick={() => setShowFuelHistoryModal(true)}>
                             ⛽ Historial
                         </button>

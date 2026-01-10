@@ -25,7 +25,7 @@ export const GaragePage = () => {
 
     return (
         <div className="container-fluid flex-grow-1 py-4" style={{
-            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/garage-bg.png')",
+            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/garage-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             color: 'white',

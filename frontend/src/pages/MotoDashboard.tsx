@@ -76,7 +76,7 @@ export const MotoDashboard = () => {
     if (loading || !moto) return <div className="p-5 text-center">Analizando moto... 🔧</div>;
 
     return (
-        <div className="container-fluid flex-grow-1 py-4" style={{
+        <div className="container-fluid flex-grow-1" style={{
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('/assets/garage-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -84,44 +84,48 @@ export const MotoDashboard = () => {
             minHeight: '100vh',
             color: 'white'
         }}>
-            <div className="container">
-                <div className="card bg-dark text-white mb-4 shadow">
-                    <div className="card-body">
-                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                            <div className="w-100">
-                                <Link to="/" className="text-white-50 text-decoration-none mb-2 d-inline-block">← Volver al Garage</Link>
-                                <h2 className="mb-0 fs-3 fs-md-2">{moto.marca} {moto.modelo}</h2>
-                                <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                                    <span className="badge bg-light text-dark">{moto.patente}</span>
-                                    {averageConsumption !== null && (
-                                        <span className="badge bg-success" title={`Consumo: ${averageConsumption.kmPerLiter.toFixed(2)} km/l | ${averageConsumption.litersPer100Km.toFixed(2)} L/100km`}>
-                                            ⛽ {averageConsumption.kmPerLiter.toFixed(1)} km/l | {averageConsumption.litersPer100Km.toFixed(1)} L/100km
-                                        </span>
-                                    )}
+            <div className="sticky-top" style={{ top: '88px', zIndex: 900, backgroundColor: 'rgba(23, 23, 23, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', margin: '0 -12px' }}>
+                <div className="container pt-4">
+                    <div className="card bg-dark text-white mb-4 shadow">
+                        <div className="card-body">
+                            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                <div className="w-100">
+                                    <Link to="/" className="text-white-50 text-decoration-none mb-2 d-inline-block">← Volver al Garage</Link>
+                                    <h2 className="mb-0 fs-3 fs-md-2">{moto.marca} {moto.modelo}</h2>
+                                    <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                                        <span className="badge bg-light text-dark">{moto.patente}</span>
+                                        {averageConsumption !== null && (
+                                            <span className="badge bg-success" title={`Consumo: ${averageConsumption.kmPerLiter.toFixed(2)} km/l | ${averageConsumption.litersPer100Km.toFixed(2)} L/100km`}>
+                                                ⛽ {averageConsumption.kmPerLiter.toFixed(1)} km/l | {averageConsumption.litersPer100Km.toFixed(1)} L/100km
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="text-md-end w-100 w-md-auto border-md-0 mt-2 mt-md-0">
-                                <div className="display-6 fs-2 fs-md-1 fw-bold">{moto.km_actual.toLocaleString()} <small className="fs-6 opacity-75">km</small></div>
-                                <div className="d-flex gap-2 justify-content-start justify-content-md-end mt-2">
-                                    <button
-                                        className="btn btn-sm btn-outline-light flex-grow-1 flex-md-grow-0"
-                                        onClick={() => setShowOdometerHistoryModal(true)}
-                                        title="Ver historial de kilómetros"
-                                    >
-                                        🕓 Historial
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-light flex-grow-1 flex-md-grow-0"
-                                        onClick={() => setShowKmModal(true)} // Abrir modal KM
-                                    >
-                                        ✏️ Actualizar
-                                    </button>
+                                <div className="text-md-end w-100 w-md-auto border-md-0 mt-2 mt-md-0">
+                                    <div className="display-6 fs-2 fs-md-1 fw-bold">{moto.km_actual.toLocaleString()} <small className="fs-6 opacity-75">km</small></div>
+                                    <div className="d-flex gap-2 justify-content-start justify-content-md-end mt-2">
+                                        <button
+                                            className="btn btn-sm btn-outline-light flex-grow-1 flex-md-grow-0"
+                                            onClick={() => setShowOdometerHistoryModal(true)}
+                                            title="Ver historial de kilómetros"
+                                        >
+                                            🕓 Historial
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-light flex-grow-1 flex-md-grow-0"
+                                            onClick={() => setShowKmModal(true)} // Abrir modal KM
+                                        >
+                                            ✏️ Actualizar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div className="container pb-4 pt-3">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4 gap-3">
                     <h4 className="mb-0 fs-5 fs-md-4 fw-bold">Estado de Mantenimiento</h4>
                     <div className="d-flex gap-2 flex-wrap w-100 w-md-auto">

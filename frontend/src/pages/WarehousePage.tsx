@@ -121,7 +121,7 @@ const WarehousePage = () => {
     }, 0);
 
     return (
-        <div className="container-fluid flex-grow-1 py-4" style={{
+        <div className="container-fluid flex-grow-1" style={{
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/galpon.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -129,118 +129,124 @@ const WarehousePage = () => {
             minHeight: '100vh',
             color: 'white'
         }}>
-            <div className="container">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 className="mb-0" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>📦 Almacén de Repuestos</h2>
-                        <p className="text-white-50">Gestiona tus repuestos, accesorios y sistemáticos</p>
+            {/* Cabecera Fija */}
+            <div className="sticky-top" style={{ zIndex: 1000, backgroundColor: 'rgba(23, 23, 23, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                <div className="container pt-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 className="mb-0" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>📦 Almacén de Repuestos</h2>
+                            <p className="text-white-50">Gestiona tus repuestos, accesorios y sistemáticos</p>
+                        </div>
+                        <button
+                            className="btn p-0 border-0"
+                            onClick={() => { setSelectedItem(null); setShowModal(true); }}
+                            style={{ transition: 'transform 0.2s' }}
+                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            title="Cargar Compra"
+                        >
+                            <img
+                                src="/assets/carrito_compras.png"
+                                alt="Cargar Compra"
+                                className="rounded-circle shadow-lg"
+                                style={{
+                                    height: '70px',
+                                    width: '70px',
+                                    objectFit: 'cover',
+                                    border: '3px solid white',
+                                    backgroundColor: 'white' // Added background color for transparency handling if needed
+                                }}
+                            />
+                        </button>
                     </div>
-                    <button
-                        className="btn p-0 border-0"
-                        onClick={() => { setSelectedItem(null); setShowModal(true); }}
-                        style={{ transition: 'transform 0.2s' }}
-                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        title="Cargar Compra"
-                    >
-                        <img
-                            src="/assets/carrito_compras.png"
-                            alt="Cargar Compra"
-                            className="rounded-circle shadow-lg"
-                            style={{
-                                height: '70px',
-                                width: '70px',
-                                objectFit: 'cover',
-                                border: '3px solid white',
-                                backgroundColor: 'white' // Added background color for transparency handling if needed
-                            }}
-                        />
-                    </button>
-                </div>
 
-                <div className="row mb-4">
-                    <div className="col-md-12">
-                        <div className="card border-0 shadow-sm bg-dark text-white p-3 mb-3">
-                            <div className="row align-items-center g-3">
-                                <div className="col-sm-6 col-lg-4">
-                                    <div className="d-flex gap-3 gap-md-4">
-                                        <div>
-                                            <small className="d-block opacity-75">Inversión Total</small>
-                                            <h4 className="mb-0 fs-5 fs-md-4">${totalInversion.toLocaleString()}</h4>
+                    <div className="row mb-4">
+                        <div className="col-md-12">
+                            <div className="card border-0 shadow-sm bg-dark text-white p-3 mb-3">
+                                <div className="row align-items-center g-3">
+                                    <div className="col-sm-6 col-lg-4">
+                                        <div className="d-flex gap-3 gap-md-4">
+                                            <div>
+                                                <small className="d-block opacity-75">Inversión Total</small>
+                                                <h4 className="mb-0 fs-5 fs-md-4">${totalInversion.toLocaleString()}</h4>
+                                            </div>
+                                            <div className="border-start ps-3 ps-md-4">
+                                                <small className="d-block opacity-75">Diferentes</small>
+                                                <h4 className="mb-0 fs-5 fs-md-4">{groups.length}</h4>
+                                            </div>
                                         </div>
-                                        <div className="border-start ps-3 ps-md-4">
-                                            <small className="d-block opacity-75">Diferentes</small>
-                                            <h4 className="mb-0 fs-5 fs-md-4">{groups.length}</h4>
+                                    </div>
+                                    <div className="col-lg-4">
+                                        <div className="input-group">
+                                            <span className="input-group-text bg-white border-0 pe-0">🔍</span>
+                                            <input
+                                                type="text"
+                                                className="form-control border-0 shadow-none ps-2"
+                                                placeholder="Buscar por nombre o número de parte..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-5 col-xl-2 text-md-end">
+                                        <div className="btn-group w-100" role="group">
+                                            {['All', 'Repuesto', 'Accesorio', 'Sistemático'].map((cat) => (
+                                                <button
+                                                    key={cat}
+                                                    className={`btn btn-sm py-2 py-md-1 ${filter === cat ? 'btn-light' : 'btn-outline-light'}`}
+                                                    onClick={() => setFilter(cat as any)}
+                                                >
+                                                    {cat === 'All' ? 'Todos' : (cat === 'Sistemático' ? 'Sist.' : cat + 's')}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-4">
-                                    <div className="input-group">
-                                        <span className="input-group-text bg-white border-0 pe-0">🔍</span>
-                                        <input
-                                            type="text"
-                                            className="form-control border-0 shadow-none ps-2"
-                                            placeholder="Buscar por nombre o número de parte..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
+                                <div className="row g-3 mt-1 align-items-center">
+                                    <div className="col-md-auto">
+                                        <small className="text-white-50 me-2">Filtrar por Fecha:</small>
                                     </div>
-                                </div>
-                                <div className="col-lg-5 col-xl-2 text-md-end">
-                                    <div className="btn-group w-100" role="group">
-                                        {['All', 'Repuesto', 'Accesorio', 'Sistemático'].map((cat) => (
+                                    <div className="col-md-3">
+                                        <div className="input-group input-group-sm">
+                                            <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Desde</span>
+                                            <input
+                                                type="date"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={dateFrom}
+                                                onChange={(e) => setDateFrom(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <div className="input-group input-group-sm">
+                                            <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Hasta</span>
+                                            <input
+                                                type="date"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={dateTo}
+                                                onChange={(e) => setDateTo(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-md-auto">
+                                        {(dateFrom || dateTo) && (
                                             <button
-                                                key={cat}
-                                                className={`btn btn-sm py-2 py-md-1 ${filter === cat ? 'btn-light' : 'btn-outline-light'}`}
-                                                onClick={() => setFilter(cat as any)}
+                                                className="btn btn-sm btn-outline-danger border-0"
+                                                onClick={() => { setDateFrom(''); setDateTo(''); }}
                                             >
-                                                {cat === 'All' ? 'Todos' : (cat === 'Sistemático' ? 'Sist.' : cat + 's')}
+                                                ✕ Limpiar Fechas
                                             </button>
-                                        ))}
+                                        )}
                                     </div>
-                                </div>
-                            </div>
-                            <div className="row g-3 mt-1 align-items-center">
-                                <div className="col-md-auto">
-                                    <small className="text-white-50 me-2">Filtrar por Fecha:</small>
-                                </div>
-                                <div className="col-md-3">
-                                    <div className="input-group input-group-sm">
-                                        <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Desde</span>
-                                        <input
-                                            type="date"
-                                            className="form-control bg-dark text-white border-secondary"
-                                            value={dateFrom}
-                                            onChange={(e) => setDateFrom(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-3">
-                                    <div className="input-group input-group-sm">
-                                        <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Hasta</span>
-                                        <input
-                                            type="date"
-                                            className="form-control bg-dark text-white border-secondary"
-                                            value={dateTo}
-                                            onChange={(e) => setDateTo(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-auto">
-                                    {(dateFrom || dateTo) && (
-                                        <button
-                                            className="btn btn-sm btn-outline-danger border-0"
-                                            onClick={() => { setDateFrom(''); setDateTo(''); }}
-                                        >
-                                            ✕ Limpiar Fechas
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            {/* Contenido Scrollable */}
+            <div className="container pb-4 pt-3">
                 {loading ? (
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary" role="status">
@@ -273,7 +279,7 @@ const WarehousePage = () => {
                                                 </span>
                                                 <h5 className="mb-0 fw-bold flex-grow-1 text-white">{group.nombre}</h5>
                                                 {group.nro_parte && (
-                                                    <span className="badge bg-secondary px-2 py-1 rounded-1 text-uppercase text-white" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>
+                                                    <span className="badge bg-secondary px-2 py-1 rounded-1 text-uppercase text-white" style={{ fontSize: '0.9rem', letterSpacing: '0.5px' }}>
                                                         N/P: {group.nro_parte}
                                                     </span>
                                                 )}

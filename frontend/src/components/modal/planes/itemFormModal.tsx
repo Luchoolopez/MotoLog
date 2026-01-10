@@ -13,7 +13,7 @@ interface Props {
 export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Props) => {
     const [formData, setFormData] = useState({
         tarea: '',
-        tipo: 'Inspección' as 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste',
+        tipo: ['Inspección'] as string[],
         intervalo_km: 0 as string | number,
         intervalo_meses: 0 as string | number,
         consumo_sistematico: false,
@@ -35,7 +35,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         const newItem: CreateItemDto = {
             plan_id: planId,
             tarea: formData.tarea,
-            tipo: formData.tipo,
+            tipo: formData.tipo.join(','), // Convert array to comma-separated string
             intervalo_km: Number(formData.intervalo_km),
             intervalo_meses: Number(formData.intervalo_meses),
             consumo_sistematico: formData.consumo_sistematico,
@@ -47,7 +47,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         setIsSubmitting(false);
 
         if (success) {
-            setFormData({ tarea: '', tipo: 'Inspección', intervalo_km: 0, intervalo_meses: 0, consumo_sistematico: false, associated_items: [] });
+            setFormData({ tarea: '', tipo: ['Inspección'], intervalo_km: 0, intervalo_meses: 0, consumo_sistematico: false, associated_items: [] });
             onSuccess();
             onClose();
         }
@@ -74,18 +74,32 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                 />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Tipo de Tarea</label>
-                                <select
-                                    className="form-select"
-                                    value={formData.tipo}
-                                    onChange={e => setFormData({ ...formData, tipo: e.target.value as any })}
-                                >
-                                    <option value="Inspección">Inspección - (I)</option>
-                                    <option value="Cambio">Cambio / Reemplazo - (R)</option>
-                                    <option value="Limpieza">Limpieza - (C)</option>
-                                    <option value="Lubricación">Lubricación - (L)</option>
-                                    <option value="Ajuste">Ajuste - (A)</option>
-                                </select>
+                                <label className="form-label">Tipo de Tarea (Selecciona uno o más)</label>
+                                <div className="d-flex flex-wrap gap-2 mb-2">
+                                    {['Inspección', 'Cambio', 'Limpieza', 'Lubricación', 'Ajuste'].map((type) => (
+                                        <div key={type} className="form-check form-check-inline">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id={`type-${type}`}
+                                                checked={formData.tipo.includes(type)}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setFormData(prev => {
+                                                        if (checked) {
+                                                            return { ...prev, tipo: [...prev.tipo, type] };
+                                                        } else {
+                                                            return { ...prev, tipo: prev.tipo.filter(t => t !== type) };
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                            <label className="form-check-label" htmlFor={`type-${type}`}>
+                                                {type}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="row">
                                 <div className="col-6 mb-3">
@@ -98,6 +112,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                             ...formData,
                                             intervalo_km: e.target.value === '' ? '' : Number(e.target.value)
                                         })}
+                                        onFocus={(e) => e.target.select()}
                                         required
                                     />
                                 </div>
@@ -112,6 +127,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                             ...formData,
                                             intervalo_meses: e.target.value === '' ? '' : Number(e.target.value)
                                         })}
+                                        onFocus={(e) => e.target.select()}
                                         required
                                     />
                                 </div>

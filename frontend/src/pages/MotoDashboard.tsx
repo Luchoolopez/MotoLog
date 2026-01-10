@@ -208,16 +208,20 @@ export const MotoDashboard = () => {
                     )}
 
                     {statuses.map((item) => {
-                        // ... (Tu lógica de colores e iconos sigue igual)
                         // Icono basado en el TIPO de tarea
-                        let icon = '🔧'; // Default
-                        switch (item.tipo) {
-                            case 'Inspección': icon = '👁️'; break;
-                            case 'Cambio': icon = '🛠️'; break;
-                            case 'Limpieza': icon = '🫧'; break;
-                            case 'Lubricación': icon = '🛢️'; break;
-                            case 'Ajuste': icon = '🔧'; break;
-                        }
+                        const getIcon = (t: string) => {
+                            switch (t.trim()) {
+                                case 'Inspección': return '👁️';
+                                case 'Cambio': return '🛠️';
+                                case 'Limpieza': return '🫧';
+                                case 'Lubricación': return '🛢️';
+                                case 'Ajuste': return '🔧';
+                                default: return '🔧';
+                            }
+                        };
+
+                        const types = item.tipo.split(',');
+                        // const mainIcon = getIcon(types[0]); // Usar el primero como principal si se requiere uno solo
 
                         let borderClass = 'border-start border-5 border-success';
                         let bgClass = '';
@@ -255,8 +259,10 @@ export const MotoDashboard = () => {
                                                 onMouseLeave={() => setHoveredItem(null)}
                                                 style={{ cursor: 'help' }}
                                             >
-                                                <span className="fs-4" role="img" aria-label={item.tipo}>
-                                                    {icon}
+                                                <span className="fs-4 d-flex gap-1" role="img" aria-label={item.tipo}>
+                                                    {types.map((t, i) => (
+                                                        <span key={i} title={t}>{getIcon(t)}</span>
+                                                    ))}
                                                 </span>
 
                                                 {hoveredItem === item.item_id && (

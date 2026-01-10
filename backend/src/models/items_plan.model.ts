@@ -8,7 +8,7 @@ interface itemsPlanAttributes {
     intervalo_km: number;
     intervalo_meses: number;
     consumo_sistematico?: boolean;
-    tipo: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
+    tipo: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -23,7 +23,7 @@ export class ItemsPlan extends Model<itemsPlanAttributes, itemsPlanCreationAttri
     public intervalo_km!: number;
     public intervalo_meses!: number;
     public consumo_sistematico!: boolean;
-    public tipo!: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
+    public tipo!: string;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -44,7 +44,7 @@ ItemsPlan.init(
             allowNull: false
         },
         tipo: {
-            type: DataTypes.ENUM('Inspección', 'Cambio', 'Limpieza', 'Lubricación', 'Ajuste'),
+            type: DataTypes.STRING, // Changed from ENUM to STRING for multi-select
             allowNull: false,
             defaultValue: 'Inspección'
         },

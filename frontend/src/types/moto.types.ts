@@ -16,7 +16,7 @@ export interface Motorcycle {
 export interface MaintenanceStatus {
     item_id: number;
     tarea: string;
-    tipo: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
+    tipo: string;
     estado: 'OK' | 'ALERTA' | 'VENCIDO';
     km_limite: number;
     km_restantes: number;

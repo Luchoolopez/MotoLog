@@ -142,6 +142,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                             type="number" className="form-control"
                                             value={formData.precio_compra}
                                             onChange={e => setFormData({ ...formData, precio_compra: Number(e.target.value) })}
+                                            onFocus={(e) => e.target.select()}
                                             min="0" step="0.01" required
                                         />
                                     </div>
@@ -153,6 +154,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         type="number" className="form-control"
                                         value={formData.cantidad}
                                         onChange={e => setFormData({ ...formData, cantidad: Number(e.target.value) })}
+                                        onFocus={(e) => e.target.select()}
                                         min="0" required
                                     />
                                 </div>

@@ -4,6 +4,7 @@ export interface ItemPlan {
     tarea: string;
     intervalo_km: number;
     intervalo_meses: number;
+    tipo: string;
     consumo_sistematico: boolean;
     created_at?: string;
     updated_at?: string;
@@ -24,6 +25,7 @@ export interface CreateItemDto {
     tarea: string;
     intervalo_km: number;
     intervalo_meses: number;
+    tipo: string;
     consumo_sistematico: boolean;
     associated_items?: {
         warehouse_item_id: number;

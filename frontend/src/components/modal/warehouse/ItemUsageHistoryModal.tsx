@@ -67,32 +67,32 @@ export const ItemUsageHistoryModal = ({ show, onClose, itemId, itemName }: Props
                                 <table className="table table-hover align-middle mb-0">
                                     <thead className="table-light sticky-top">
                                         <tr>
-                                            <th>Fecha</th>
-                                            <th>Evento</th>
+                                            <th className="ps-3">Fecha</th>
+                                            <th className="d-none d-md-table-cell">Evento</th>
                                             <th>Detalle / Moto</th>
                                             <th className="text-center">Cambio</th>
-                                            <th className="text-end">Info Extra</th>
+                                            <th className="text-end pe-3">Info</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {history.map((record, idx) => (
                                             <tr key={`${record.type}-${record.id}-${idx}`}>
-                                                <td>{new Date(record.date).toLocaleDateString()}</td>
-                                                <td>
+                                                <td className="ps-3 text-nowrap">{new Date(record.date).toLocaleDateString()}</td>
+                                                <td className="d-none d-md-table-cell">
                                                     <span className={`badge ${record.type === 'PURCHASE' ? 'bg-success' : 'bg-danger'}`}>
                                                         {record.type === 'PURCHASE' ? 'ENTRADA' : 'SALIDA'}
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <div className="fw-bold small">{record.detail}</div>
-                                                    {record.moto && <small className="text-muted">{record.moto}</small>}
+                                                <td style={{ maxWidth: '120px' }}>
+                                                    <div className="fw-bold small text-truncate" title={record.detail}>{record.detail}</div>
+                                                    {record.moto && <small className="text-muted d-block text-truncate" title={record.moto}>{record.moto}</small>}
                                                 </td>
                                                 <td className="text-center">
                                                     <span className={`fw-bold ${record.quantity > 0 ? 'text-success' : 'text-danger'}`}>
                                                         {record.quantity > 0 ? `+${record.quantity}` : record.quantity}
                                                     </span>
                                                 </td>
-                                                <td className="text-end text-muted small">
+                                                <td className="text-end text-muted small pe-3 text-nowrap">
                                                     {record.price ? `$${record.price.toLocaleString()}` :
                                                         record.km ? `${record.km.toLocaleString()} km` : '-'}
                                                 </td>

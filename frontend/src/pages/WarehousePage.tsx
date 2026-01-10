@@ -120,6 +120,51 @@ const WarehousePage = () => {
         return acc + (item.precio_compra * item.cantidad);
     }, 0);
 
+    const handleExportCSV = () => {
+        if (!groups.length) return;
+
+        // Flatten the groups to get all items
+        const allItems = groups.flatMap(g => g.batches).sort((a: any, b: any) => new Date(b.fecha_compra).getTime() - new Date(a.fecha_compra).getTime());
+
+        // Define headers
+        const headers = ['Fecha Compra', 'Categoría', 'Nombre', 'Nro Parte', 'Modelo Moto', 'Lugar Compra', 'Precio', 'Cantidad Inicial', 'Stock Actual'];
+
+        // Map data
+        const csvContent = [
+            headers.join(','),
+            ...allItems.map(item => {
+                const date = new Date(item.fecha_compra).toISOString().split('T')[0];
+                const cleanName = `"${item.nombre.replace(/"/g, '""')}"`; // Escape quotes
+                const cleanPart = `"${(item.nro_parte || '').replace(/"/g, '""')}"`;
+                const cleanPlace = `"${(item.lugar_compra || '').replace(/"/g, '""')}"`;
+                const cleanModel = `"${(item.modelo_moto || '').replace(/"/g, '""')}"`;
+
+                return [
+                    date,
+                    item.categoria,
+                    cleanName,
+                    cleanPart,
+                    cleanModel,
+                    cleanPlace,
+                    item.precio_compra,
+                    item.cantidad,
+                    item.stock_actual
+                ].join(',');
+            })
+        ].join('\n');
+
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `almacen_filtros_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="container-fluid flex-grow-1" style={{
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/galpon.png')",
@@ -203,10 +248,10 @@ const WarehousePage = () => {
                                     </div>
                                 </div>
                                 <div className="row g-3 mt-1 align-items-center">
-                                    <div className="col-md-auto">
+                                    <div className="col-12 col-md-auto">
                                         <small className="text-white-50 me-2">Filtrar por Fecha:</small>
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-6 col-md-3">
                                         <div className="input-group input-group-sm">
                                             <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Desde</span>
                                             <input
@@ -217,7 +262,7 @@ const WarehousePage = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-6 col-md-3">
                                         <div className="input-group input-group-sm">
                                             <span className="input-group-text bg-transparent text-white border-secondary d-none d-sm-inline">Hasta</span>
                                             <input
@@ -228,15 +273,25 @@ const WarehousePage = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-md-auto">
-                                        {(dateFrom || dateTo) && (
+                                    <div className="col-12 col-md-auto ms-md-auto">
+                                        <div className="d-flex gap-2 justify-content-end">
+                                            {(dateFrom || dateTo) && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-danger border-0"
+                                                    onClick={() => { setDateFrom(''); setDateTo(''); }}
+                                                >
+                                                    ✕ Limpiar
+                                                </button>
+                                            )}
                                             <button
-                                                className="btn btn-sm btn-outline-danger border-0"
-                                                onClick={() => { setDateFrom(''); setDateTo(''); }}
+                                                className="btn btn-sm text-success border-0 fw-bold"
+                                                onClick={handleExportCSV}
+                                                style={{ backgroundColor: 'rgba(25, 135, 84, 0.1)' }}
+                                                title="Descargar listado en Excel (CSV)"
                                             >
-                                                ✕ Limpiar Fechas
+                                                📄 Descargar Excel
                                             </button>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -323,18 +378,18 @@ const WarehousePage = () => {
                                             <table className="table table-sm table-hover align-middle mb-0">
                                                 <thead className="bg-white border-bottom">
                                                     <tr style={{ fontSize: '0.75rem' }}>
-                                                        <th className="ps-4 py-2 text-muted text-uppercase fw-bold">Fecha</th>
-                                                        <th className="py-2 text-muted text-uppercase fw-bold">Lugar</th>
+                                                        <th className="ps-2 ps-md-4 py-2 text-muted text-uppercase fw-bold">Fecha</th>
+                                                        <th className="py-2 text-muted text-uppercase fw-bold d-none d-md-table-cell">Lugar</th>
                                                         <th className="text-end py-2 text-muted text-uppercase fw-bold">Precio</th>
                                                         <th className="text-center py-2 text-muted text-uppercase fw-bold">Stock</th>
-                                                        <th className="text-end pe-4 py-2 text-muted text-uppercase fw-bold">Acciones</th>
+                                                        <th className="text-end pe-2 pe-md-4 py-2 text-muted text-uppercase fw-bold">Acciones</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {group.batches.sort((a: any, b: any) => new Date(b.fecha_compra).getTime() - new Date(a.fecha_compra).getTime()).map((item: WarehouseItem) => (
                                                         <tr key={item.id} className="bg-white hover:bg-light transition-colors">
-                                                            <td className="ps-4 py-3">{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
-                                                            <td className="py-3 text-muted">{item.lugar_compra || '-'}</td>
+                                                            <td className="ps-2 ps-md-4 py-3">{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
+                                                            <td className="py-3 text-muted d-none d-md-table-cell">{item.lugar_compra || '-'}</td>
                                                             <td className="text-end fw-bold py-3 text-primary">${item.precio_compra.toLocaleString()}</td>
                                                             <td className="text-center py-3">
                                                                 <div className="d-flex flex-column align-items-center">
@@ -343,7 +398,7 @@ const WarehousePage = () => {
                                                                     </span>
                                                                 </div>
                                                             </td>
-                                                            <td className="text-end pe-4 py-3">
+                                                            <td className="text-end pe-2 pe-md-4 py-3">
                                                                 <div className="btn-group shadow-sm rounded-2 overflow-hidden d-flex flex-nowrap">
                                                                     <button
                                                                         className="btn btn-sm btn-success border-0 py-1 px-2"

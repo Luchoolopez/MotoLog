@@ -62,7 +62,7 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
                         <h5 className="modal-title">⛽ Historial de Combustible</h5>
                         <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
                     </div>
-                    <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                    <div className="modal-body d-flex flex-column" style={{ height: '70vh', padding: 0 }}>
                         {loading ? (
                             <div className="text-center py-4">
                                 <div className="spinner-border text-primary" role="status">
@@ -71,70 +71,76 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
                             </div>
                         ) : (
                             <>
-                                <div className="row mb-4">
-                                    <div className="col-md-6 mb-2">
-                                        <div className="card bg-success text-white text-center p-3 shadow-sm h-100">
-                                            <small className="text-white-50">Consumo Promedio</small>
-                                            <h2 className="mb-0">{avgConsumption && avgConsumption.kmPerLiter > 0 ? `${avgConsumption.kmPerLiter.toFixed(2)} km/l` : '---'}</h2>
+                                {/* Stats Section - Fixed at top */}
+                                <div className="p-3 bg-light border-bottom">
+                                    <div className="row">
+                                        <div className="col-md-6 mb-2 mb-md-0">
+                                            <div className="card bg-success text-white text-center p-3 shadow-sm h-100">
+                                                <small className="text-white-50">Consumo Promedio</small>
+                                                <h2 className="mb-0">{avgConsumption && avgConsumption.kmPerLiter > 0 ? `${avgConsumption.kmPerLiter.toFixed(2)} km/l` : '---'}</h2>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-6 mb-2">
-                                        <div className="card bg-info text-dark text-center p-3 shadow-sm h-100">
-                                            <small className="text-dark-50">Consumo Promedio</small>
-                                            <h2 className="mb-0">{avgConsumption && avgConsumption.litersPer100Km > 0 ? `${avgConsumption.litersPer100Km.toFixed(2)} L/100km` : '---'}</h2>
+                                        <div className="col-md-6">
+                                            <div className="card bg-info text-dark text-center p-3 shadow-sm h-100">
+                                                <small className="text-dark-50">Consumo Promedio</small>
+                                                <h2 className="mb-0">{avgConsumption && avgConsumption.litersPer100Km > 0 ? `${avgConsumption.litersPer100Km.toFixed(2)} L/100km` : '---'}</h2>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {history.length === 0 ? (
-                                    <div className="alert alert-info text-center">
-                                        No hay registros de combustible disponibles.
-                                    </div>
-                                ) : (
-                                    <div className="table-responsive">
-                                        <table className="table table-hover align-middle">
-                                            <thead className="table-light">
-                                                <tr>
-                                                    <th>Fecha</th>
-                                                    <th>KM</th>
-                                                    <th>Litros</th>
-                                                    <th>Precio</th>
-                                                    <th>Total</th>
-                                                    <th>Empresa</th>
-                                                    <th className="text-center">Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {history.map((record) => (
-                                                    <tr key={record.id}>
-                                                        <td>{new Date(record.fecha).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
-                                                        <td>{record.km_momento.toLocaleString()}</td>
-                                                        <td className="fw-bold">{record.litros} L</td>
-                                                        <td>${record.precio_por_litro}</td>
-                                                        <td className="fw-bold text-success">${record.total.toLocaleString()}</td>
-                                                        <td><span className="badge bg-secondary">{record.empresa}</span></td>
-                                                        <td className="text-center">
-                                                            <div className="btn-group">
-                                                                <button
-                                                                    className="btn btn-sm btn-outline-info"
-                                                                    onClick={() => handleEdit(record)}
-                                                                >
-                                                                    ✏️
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-sm btn-outline-danger"
-                                                                    onClick={() => handleDelete(record.id)}
-                                                                >
-                                                                    🗑️
-                                                                </button>
-                                                            </div>
-                                                        </td>
+                                {/* Table Section - Scrollable */}
+                                <div className="flex-grow-1 overflow-auto p-3">
+                                    {history.length === 0 ? (
+                                        <div className="alert alert-info text-center">
+                                            No hay registros de combustible disponibles.
+                                        </div>
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead className="table-light sticky-top" style={{ top: 0, zIndex: 1 }}>
+                                                    <tr>
+                                                        <th>Fecha</th>
+                                                        <th>KM</th>
+                                                        <th>Litros</th>
+                                                        <th>Precio</th>
+                                                        <th>Total</th>
+                                                        <th>Empresa</th>
+                                                        <th className="text-center">Acciones</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
+                                                </thead>
+                                                <tbody>
+                                                    {history.map((record) => (
+                                                        <tr key={record.id}>
+                                                            <td>{new Date(record.fecha).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
+                                                            <td>{record.km_momento.toLocaleString()}</td>
+                                                            <td className="fw-bold">{record.litros} L</td>
+                                                            <td>${record.precio_por_litro}</td>
+                                                            <td className="fw-bold text-success">${record.total.toLocaleString()}</td>
+                                                            <td><span className="badge bg-secondary">{record.empresa}</span></td>
+                                                            <td className="text-center">
+                                                                <div className="btn-group">
+                                                                    <button
+                                                                        className="btn btn-sm btn-outline-info"
+                                                                        onClick={() => handleEdit(record)}
+                                                                    >
+                                                                        ✏️
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-sm btn-outline-danger"
+                                                                        onClick={() => handleDelete(record.id)}
+                                                                    >
+                                                                        🗑️
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
                     </div>

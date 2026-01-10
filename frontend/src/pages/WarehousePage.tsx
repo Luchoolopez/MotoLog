@@ -108,7 +108,11 @@ const WarehousePage = () => {
         return acc;
     }, {} as Record<string, any>);
 
-    const groups = Object.values(groupedItems).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    const groups = Object.values(groupedItems).sort((a: any, b: any) => {
+        const latestA = Math.max(...a.batches.map((i: any) => new Date(i.fecha_compra).getTime()));
+        const latestB = Math.max(...b.batches.map((i: any) => new Date(i.fecha_compra).getTime()));
+        return latestB - latestA;
+    });
 
     const totalInversion = items.reduce((acc, item) => {
         // Apply the same filters to the total investment

@@ -13,6 +13,7 @@ interface Props {
 export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Props) => {
     const [formData, setFormData] = useState({
         tarea: '',
+        tipo: 'Inspección' as 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste',
         intervalo_km: 0 as string | number,
         intervalo_meses: 0 as string | number,
         consumo_sistematico: false,
@@ -34,6 +35,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         const newItem: CreateItemDto = {
             plan_id: planId,
             tarea: formData.tarea,
+            tipo: formData.tipo,
             intervalo_km: Number(formData.intervalo_km),
             intervalo_meses: Number(formData.intervalo_meses),
             consumo_sistematico: formData.consumo_sistematico,
@@ -45,7 +47,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
         setIsSubmitting(false);
 
         if (success) {
-            setFormData({ tarea: '', intervalo_km: 0, intervalo_meses: 0, consumo_sistematico: false, associated_items: [] });
+            setFormData({ tarea: '', tipo: 'Inspección', intervalo_km: 0, intervalo_meses: 0, consumo_sistematico: false, associated_items: [] });
             onSuccess();
             onClose();
         }
@@ -70,6 +72,20 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                     onChange={e => setFormData({ ...formData, tarea: e.target.value })}
                                     autoFocus required
                                 />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Tipo de Tarea</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.tipo}
+                                    onChange={e => setFormData({ ...formData, tipo: e.target.value as any })}
+                                >
+                                    <option value="Inspección">Inspección - (I)</option>
+                                    <option value="Cambio">Cambio / Reemplazo - (R)</option>
+                                    <option value="Limpieza">Limpieza - (C)</option>
+                                    <option value="Lubricación">Lubricación - (L)</option>
+                                    <option value="Ajuste">Ajuste - (A)</option>
+                                </select>
                             </div>
                             <div className="row">
                                 <div className="col-6 mb-3">

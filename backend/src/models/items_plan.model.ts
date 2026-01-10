@@ -8,6 +8,7 @@ interface itemsPlanAttributes {
     intervalo_km: number;
     intervalo_meses: number;
     consumo_sistematico?: boolean;
+    tipo: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -22,6 +23,7 @@ export class ItemsPlan extends Model<itemsPlanAttributes, itemsPlanCreationAttri
     public intervalo_km!: number;
     public intervalo_meses!: number;
     public consumo_sistematico!: boolean;
+    public tipo!: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -40,6 +42,11 @@ ItemsPlan.init(
         tarea: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        tipo: {
+            type: DataTypes.ENUM('Inspección', 'Cambio', 'Limpieza', 'Lubricación', 'Ajuste'),
+            allowNull: false,
+            defaultValue: 'Inspección'
         },
         intervalo_km: {
             type: DataTypes.INTEGER,

@@ -150,7 +150,16 @@ export const MotoDashboard = () => {
 
                     {statuses.map((item) => {
                         // ... (Tu lógica de colores e iconos sigue igual)
-                        let icon = '🟢';
+                        // Icono basado en el TIPO de tarea
+                        let icon = '🔧'; // Default
+                        switch (item.tipo) {
+                            case 'Inspección': icon = '👁️'; break;
+                            case 'Cambio': icon = '🛠️'; break;
+                            case 'Limpieza': icon = '🫧'; break;
+                            case 'Lubricación': icon = '🛢️'; break;
+                            case 'Ajuste': icon = '🔧'; break;
+                        }
+
                         let borderClass = 'border-start border-5 border-success';
                         let bgClass = '';
                         let btnText = 'Registrar';
@@ -159,7 +168,7 @@ export const MotoDashboard = () => {
                         let textDescClass = 'text-muted'; // Default for OK
 
                         if (item.estado === 'ALERTA') {
-                            icon = '🟡';
+                            // icon = '🟡'; // Mantener icono de tipo
                             borderClass = 'border-start border-5 border-warning';
                             bgClass = 'bg-warning bg-opacity-10';
                             btnText = 'Registrar Pronto';
@@ -167,7 +176,7 @@ export const MotoDashboard = () => {
                             textTitleClass = 'text-white';
                             textDescClass = 'text-white-50';
                         } else if (item.estado === 'VENCIDO') {
-                            icon = '🔴';
+                            // icon = '🔴'; // Mantener icono de tipo
                             borderClass = 'border-start border-5 border-danger';
                             bgClass = 'bg-danger bg-opacity-10';
                             btnText = '¡REGISTRAR YA!';
@@ -181,24 +190,34 @@ export const MotoDashboard = () => {
                                 <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center gap-3">
                                     <div className="w-100">
                                         <h5 className={`mb-1 d-flex align-items-center gap-2 fs-6 fs-md-5 ${textTitleClass}`}>
-                                            <span className="fs-4">{icon}</span> {item.tarea}
+                                            <span className="fs-4" role="img" aria-label={item.tipo}>{icon}</span>
+                                            <div>
+                                                {item.tarea}
+                                                <span className="badge bg-secondary ms-2" style={{ fontSize: '0.6em', opacity: 0.8 }}>{item.tipo}</span>
+                                            </div>
                                         </h5>
                                         <div className={`small mt-1 ${textDescClass}`}>
                                             {item.estado === 'OK' ? (
                                                 <span className="d-block d-md-inline">
-                                                    Te quedan <strong>{item.km_restantes} km</strong>
-                                                    {item.dias_restantes < 3650 && item.dias_restantes > 0 && (
-                                                        <span> o <strong>{item.dias_restantes} días</strong></span>
+                                                    {item.intervalo_km > 0 && (
+                                                        <>Te quedan <strong>{item.km_restantes} km</strong></>
+                                                    )}
+
+                                                    {item.intervalo_meses > 0 && item.dias_restantes < 3650 && (
+                                                        <span>
+                                                            {item.intervalo_km > 0 ? " o " : "Te quedan "}
+                                                            <strong>{item.dias_restantes} días</strong>
+                                                        </span>
                                                     )}
                                                 </span>
                                             ) : (
                                                 <span className="text-danger fw-bold d-block d-md-inline">
-                                                    {item.km_restantes < 0
+                                                    {item.intervalo_km > 0 && item.km_restantes < 0
                                                         ? `¡Te pasaste por ${Math.abs(item.km_restantes)} km!`
-                                                        : (item.dias_restantes < 3650 && item.dias_restantes < 0)
+                                                        : (item.intervalo_meses > 0 && item.dias_restantes < 0)
                                                             ? `¡Vencido hace ${Math.abs(item.dias_restantes)} día${Math.abs(item.dias_restantes) === 1 ? '' : 's'}!`
-                                                            : (item.dias_restantes < 3650)
-                                                                ? `Faltan ${item.km_restantes} km o ${item.dias_restantes} días.`
+                                                            : (item.intervalo_meses > 0)
+                                                                ? `${item.intervalo_km > 0 ? `Faltan ${item.km_restantes} km o ` : 'Faltan '}${item.dias_restantes} días.`
                                                                 : `Faltan ${item.km_restantes} km.`}
                                                 </span>
                                             )}

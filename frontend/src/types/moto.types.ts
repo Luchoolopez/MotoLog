@@ -16,11 +16,14 @@ export interface Motorcycle {
 export interface MaintenanceStatus {
     item_id: number;
     tarea: string;
+    tipo: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
     estado: 'OK' | 'ALERTA' | 'VENCIDO';
     km_limite: number;
     km_restantes: number;
     fecha_limite: string;
     dias_restantes: number;
+    intervalo_km: number;
+    intervalo_meses: number;
 }
 
 // Para crear una moto nueva

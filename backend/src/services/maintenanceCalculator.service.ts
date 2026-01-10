@@ -7,6 +7,7 @@ import { MaintenanceHistory } from "../models/maintenance_history.model";
 export interface MaintenanceStatus {
     item_id: number;
     tarea: string;
+    tipo: 'Inspección' | 'Cambio' | 'Limpieza' | 'Lubricación' | 'Ajuste';
     estado: 'OK' | 'ALERTA' | 'VENCIDO';
 
     km_limite: number; //a q km debe hacerse 
@@ -14,6 +15,8 @@ export interface MaintenanceStatus {
 
     fecha_limite: string;
     dias_restantes: number;
+    intervalo_km: number;
+    intervalo_meses: number;
 }
 
 export class MaintenanceCalculatorService {
@@ -105,20 +108,26 @@ export class MaintenanceCalculatorService {
             const daysWarning = item.intervalo_meses > 0 ? diasRestantes < 30 : false;
             const daysExpired = item.intervalo_meses > 0 ? diasRestantes < 0 : false;
 
-            if (kmRestantes < 0 || daysExpired) {
+            const kmWarning = item.intervalo_km > 0 ? kmRestantes < 500 : false;
+            const kmExpired = item.intervalo_km > 0 ? kmRestantes < 0 : false;
+
+            if (kmExpired || daysExpired) {
                 estado = 'VENCIDO';
-            } else if (kmRestantes < 500 || daysWarning) {
+            } else if (kmWarning || daysWarning) {
                 estado = 'ALERTA'
             }
 
             resultados.push({
                 item_id: item.id,
                 tarea: item.tarea || 'tarea sin nombre',
+                tipo: item.tipo || 'Inspección',
                 estado: estado,
                 km_limite: targetKm,
                 km_restantes: kmRestantes,
                 fecha_limite: targetFecha.toISOString().split('T')[0] || "", // Formato YYYY-MM-DD
-                dias_restantes: diasRestantes
+                dias_restantes: diasRestantes,
+                intervalo_km: item.intervalo_km,
+                intervalo_meses: item.intervalo_meses
             });
         }
         return resultados;

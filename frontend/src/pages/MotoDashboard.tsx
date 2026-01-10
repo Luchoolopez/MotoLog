@@ -35,6 +35,9 @@ export const MotoDashboard = () => {
     const [showFuelHistoryModal, setShowFuelHistoryModal] = useState(false);
     const [averageConsumption, setAverageConsumption] = useState<FuelHistoryResponse['averageConsumption'] | null>(null);
 
+    // Estado para el tooltip personalizado
+    const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+
     const [selectedItemForService, setSelectedItemForService] = useState<{ id: number, task: string } | null>(null);
     const [selectedItemForHistory, setSelectedItemForHistory] = useState<{ id: number, task: string } | null>(null);
 
@@ -246,7 +249,61 @@ export const MotoDashboard = () => {
                                 <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center gap-3">
                                     <div className="w-100">
                                         <h5 className={`mb-1 d-flex align-items-center gap-2 fs-6 fs-md-5 ${textTitleClass}`}>
-                                            <span className="fs-4" role="img" aria-label={item.tipo}>{icon}</span>
+                                            <div
+                                                className="position-relative d-inline-flex"
+                                                onMouseEnter={() => setHoveredItem(item.item_id)}
+                                                onMouseLeave={() => setHoveredItem(null)}
+                                                style={{ cursor: 'help' }}
+                                            >
+                                                <span className="fs-4" role="img" aria-label={item.tipo}>
+                                                    {icon}
+                                                </span>
+
+                                                {hoveredItem === item.item_id && (
+                                                    <div
+                                                        className="position-absolute start-50 bottom-100 mb-2 shadow-lg"
+                                                        style={{
+                                                            transform: 'translateX(-50%)',
+                                                            backgroundColor: 'rgba(33, 37, 41, 0.95)',
+                                                            color: 'white',
+                                                            padding: '0.8rem 1rem',
+                                                            borderRadius: '0.5rem',
+                                                            width: 'max-content',
+                                                            maxWidth: '220px',
+                                                            zIndex: 1060,
+                                                            border: '1px solid rgba(255,255,255,0.1)',
+                                                            backdropFilter: 'blur(4px)'
+                                                        }}
+                                                    >
+                                                        <div className="text-center">
+                                                            <div className="fw-bold mb-1 text-warning" style={{ fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase' }}>Frecuencia</div>
+                                                            <div style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
+                                                                {item.intervalo_km > 0 && (
+                                                                    <div className="d-flex align-items-center justify-content-center gap-1">
+                                                                        <span>🛣️</span>
+                                                                        <span>{item.intervalo_km.toLocaleString()} km</span>
+                                                                    </div>
+                                                                )}
+                                                                {item.intervalo_meses > 0 && (
+                                                                    <div className="d-flex align-items-center justify-content-center gap-1">
+                                                                        <span>📅</span>
+                                                                        <span>{item.intervalo_meses} meses</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Flechita abajo */}
+                                                            <div
+                                                                className="position-absolute top-100 start-50 translate-middle-x"
+                                                                style={{
+                                                                    borderLeft: '8px solid transparent',
+                                                                    borderRight: '8px solid transparent',
+                                                                    borderTop: '8px solid rgba(33, 37, 41, 0.95)'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div>
                                                 {item.tarea}
                                                 <span className="badge bg-secondary ms-2" style={{ fontSize: '0.6em', opacity: 0.8 }}>{item.tipo}</span>

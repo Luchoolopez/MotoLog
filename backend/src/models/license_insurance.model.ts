@@ -5,7 +5,7 @@ export class LicenseInsurance extends Model {
     public id!: number;
     public moto_id!: number;
     public user_id!: number;
-    public tipo!: 'Patente' | 'Seguro';
+    public tipo!: 'Patente' | 'Seguro' | 'VTV';
     public entidad!: string;
     public nro_documento!: string;
     public fecha_vencimiento!: string;
@@ -13,6 +13,7 @@ export class LicenseInsurance extends Model {
     public cobertura!: string | null;
     public cuota!: string | null;
     public pagado!: boolean;
+    public fecha_pago!: string | null;
     public observaciones!: string;
 }
 
@@ -31,7 +32,7 @@ LicenseInsurance.init({
         allowNull: false,
     },
     tipo: {
-        type: DataTypes.ENUM('Patente', 'Seguro'),
+        type: DataTypes.ENUM('Patente', 'Seguro', 'VTV'),
         allowNull: false,
     },
     entidad: {
@@ -63,6 +64,10 @@ LicenseInsurance.init({
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+    },
+    fecha_pago: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
     },
     observaciones: {
         type: DataTypes.TEXT,

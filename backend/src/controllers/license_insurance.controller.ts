@@ -10,17 +10,17 @@ export const LicenseInsuranceController = {
             // console.log(`[DEBUG] LicenseInsuranceController.getAll called for user: ${userId}`);
 
             // SANITY CHECK START
-            /*
+
             const records = await LicenseInsurance.findAll({
                 where: { user_id: userId },
                 include: [{ model: Motorcycle, as: 'moto', attributes: ['marca', 'modelo', 'patente'] }],
-                order: [['fecha_vencimiento', 'ASC']]
+                order: [['fecha_vencimiento', 'DESC']]
             });
-            console.log(`[DEBUG] LicenseInsuranceController.getAll records found: ${records.length}`);
+            // console.log(`[DEBUG] LicenseInsuranceController.getAll records found: ${records.length}`);
             res.json({ success: true, data: records });
-            */
-            console.log('[DEBUG] Sanity check: returning empty list');
-            res.json({ success: true, data: [] });
+
+            // console.log('[DEBUG] Sanity check: returning empty list');
+            // res.json({ success: true, data: [] });
             // SANITY CHECK END
         } catch (error: any) {
             console.error("Error in LicenseInsuranceController.getAll:", error);
@@ -45,6 +45,7 @@ export const LicenseInsuranceController = {
 
     create: async (req: AuthRequest, res: Response) => {
         try {
+            console.log('[DEBUG] Creating LicenseInsurance with body:', JSON.stringify(req.body, null, 2));
             const userId = req.user?.id;
             const record = await LicenseInsurance.create({
                 ...req.body,
@@ -53,7 +54,8 @@ export const LicenseInsuranceController = {
             res.status(201).json({ success: true, data: record });
         } catch (error: any) {
             console.error("Error in LicenseInsuranceController.create:", error);
-            res.status(400).json({ success: false, message: error.message });
+            console.error("Validation errors:", error.errors); // Log sequelize validation errors specifically
+            res.status(400).json({ success: false, message: error.message, details: error.errors });
         }
     },
 

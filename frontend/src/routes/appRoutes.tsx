@@ -6,6 +6,10 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import WarehousePage from '../pages/WarehousePage';
+import { ManagementPage } from '../pages/ManagementPage';
+import PatentePage from '../pages/PatentePage';
+import SeguroPage from '../pages/SeguroPage';
+import VTVPage from '../pages/VTVPage';
 
 
 export function AppRouter() {
@@ -27,6 +31,26 @@ export function AppRouter() {
                 <Route path='/warehouse' element={
                     <ProtectedRoute>
                         <WarehousePage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/management' element={
+                    <ProtectedRoute>
+                        <ManagementPage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/management/patentes' element={
+                    <ProtectedRoute>
+                        <PatentePage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/management/seguros' element={
+                    <ProtectedRoute>
+                        <SeguroPage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/management/vtv' element={
+                    <ProtectedRoute>
+                        <VTVPage />
                     </ProtectedRoute>
                 } />
             </Route>

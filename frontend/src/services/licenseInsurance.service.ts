@@ -4,7 +4,7 @@ export interface LicenseInsurance {
     id: number;
     moto_id: number;
     user_id: number;
-    tipo: 'Patente' | 'Seguro';
+    tipo: 'Patente' | 'Seguro' | 'VTV';
     entidad: string;
     nro_documento: string;
     fecha_vencimiento: string;
@@ -12,6 +12,8 @@ export interface LicenseInsurance {
     cobertura?: string | null;
     cuota?: string | null;
     pagado: boolean;
+    fecha_pago?: string | null;
+    observaciones?: string;
     moto?: {
         marca: string;
         modelo: string;
@@ -21,14 +23,15 @@ export interface LicenseInsurance {
 
 export interface CreateLicenseInsuranceDto {
     moto_id: number;
-    tipo: 'Patente' | 'Seguro';
+    tipo: 'Patente' | 'Seguro' | 'VTV';
     entidad: string;
     nro_documento: string;
     fecha_vencimiento: string;
     monto: number;
-    cobertura?: string;
-    cuota?: string;
+    cobertura?: string | null;
+    cuota?: string | null;
     pagado?: boolean;
+    fecha_pago?: string | null;
     observaciones?: string;
 }
 

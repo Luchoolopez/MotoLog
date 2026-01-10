@@ -389,7 +389,14 @@ const WarehousePage = () => {
                                                         <tr key={item.id} className="bg-white hover:bg-light transition-colors">
                                                             <td className="ps-2 ps-md-4 py-3">{new Date(item.fecha_compra).toLocaleDateString(undefined, { timeZone: 'UTC' })}</td>
                                                             <td className="py-3 text-muted d-none d-md-table-cell">{item.lugar_compra || '-'}</td>
-                                                            <td className="text-end fw-bold py-3 text-primary">${item.precio_compra.toLocaleString()}</td>
+                                                            <td className="text-end fw-bold py-3 text-primary">
+                                                                <div>${(item.precio_compra * item.cantidad).toLocaleString()}</div>
+                                                                {item.cantidad > 1 && (
+                                                                    <div className="small text-muted fw-normal" style={{ fontSize: '0.75rem' }}>
+                                                                        Unitario: ${item.precio_compra.toLocaleString()}
+                                                                    </div>
+                                                                )}
+                                                            </td>
                                                             <td className="text-center py-3">
                                                                 <div className="d-flex flex-column align-items-center">
                                                                     <span className={`badge rounded-pill ${item.stock_actual > 0 ? 'bg-success' : 'bg-danger'}`}>

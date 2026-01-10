@@ -17,6 +17,7 @@ const WarehousePage = () => {
     const [dateTo, setDateTo] = useState('');
     const [showInstallModal, setShowInstallModal] = useState(false);
     const [itemToInstall, setItemToInstall] = useState<WarehouseItem | null>(null);
+    const [isRestockMode, setIsRestockMode] = useState(false);
 
     const { showToast } = useToast();
 
@@ -38,6 +39,13 @@ const WarehousePage = () => {
 
     const handleEdit = (item: WarehouseItem) => {
         setSelectedItem(item);
+        setIsRestockMode(false);
+        setShowModal(true);
+    };
+
+    const handleRestock = (item: WarehouseItem) => {
+        setSelectedItem(item);
+        setIsRestockMode(true);
         setShowModal(true);
     };
 
@@ -361,6 +369,13 @@ const WarehousePage = () => {
                                         {/* Botones de acción */}
                                         <div className="d-flex gap-2 align-items-center align-self-end align-self-md-center">
                                             <button
+                                                className="btn btn-sm btn-outline-success border-0 rounded-circle p-2"
+                                                onClick={(e) => { e.stopPropagation(); handleRestock(group.batches[0]); }}
+                                                title="Comprar más (Re-ingreso)"
+                                            >
+                                                ➕
+                                            </button>
+                                            <button
                                                 className="btn btn-sm btn-outline-light border-0 rounded-circle p-2"
                                                 onClick={(e) => { e.stopPropagation(); handleHistory(group.batches[0]); }}
                                                 title="Ver Historial"
@@ -448,9 +463,10 @@ const WarehousePage = () => {
 
                 <WarehouseItemModal
                     show={showModal}
-                    onClose={() => setShowModal(false)}
+                    onClose={() => { setShowModal(false); setIsRestockMode(false); }}
                     onSuccess={fetchItems}
                     initialData={selectedItem}
+                    isRestock={isRestockMode}
                 />
 
                 <ItemUsageHistoryModal

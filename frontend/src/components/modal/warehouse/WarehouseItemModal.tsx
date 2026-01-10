@@ -7,9 +7,10 @@ interface Props {
     onClose: () => void;
     onSuccess: () => void;
     initialData?: WarehouseItem | null;
+    isRestock?: boolean;
 }
 
-export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Props) => {
+export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRestock }: Props) => {
     const [formData, setFormData] = useState<CreateWarehouseItemDto>({
         nombre: '',
         categoria: 'Repuesto',
@@ -28,18 +29,36 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
     useEffect(() => {
         if (show) {
             if (initialData) {
-                setFormData({
-                    nombre: initialData.nombre,
-                    categoria: initialData.categoria,
-                    fecha_compra: initialData.fecha_compra.split('T')[0],
-                    precio_compra: initialData.precio_compra,
-                    cantidad: initialData.cantidad,
-                    nro_parte: initialData.nro_parte || '',
-                    lugar_compra: initialData.lugar_compra || '',
-                    modelo_moto: initialData.modelo_moto || '',
-                    observaciones: initialData.observaciones || ''
-                });
+                if (isRestock) {
+                    // Restock Mode: Keep constant info, reset variable info
+                    setFormData({
+                        nombre: initialData.nombre,
+                        categoria: initialData.categoria,
+                        // Reset variable fields
+                        fecha_compra: new Date().toISOString().split('T')[0],
+                        precio_compra: 0,
+                        cantidad: 0,
+                        nro_parte: initialData.nro_parte || '',
+                        lugar_compra: '',
+                        modelo_moto: initialData.modelo_moto || '',
+                        observaciones: ''
+                    });
+                } else {
+                    // Edit Mode: Load everything
+                    setFormData({
+                        nombre: initialData.nombre,
+                        categoria: initialData.categoria,
+                        fecha_compra: initialData.fecha_compra.split('T')[0],
+                        precio_compra: initialData.precio_compra,
+                        cantidad: initialData.cantidad,
+                        nro_parte: initialData.nro_parte || '',
+                        lugar_compra: initialData.lugar_compra || '',
+                        modelo_moto: initialData.modelo_moto || '',
+                        observaciones: initialData.observaciones || ''
+                    });
+                }
             } else {
+                // Create Mode: Reset all
                 setFormData({
                     nombre: '',
                     categoria: 'Repuesto',
@@ -53,7 +72,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                 });
             }
         }
-    }, [show, initialData]);
+    }, [show, initialData, isRestock]);
 
     if (!show) return null;
 
@@ -61,12 +80,14 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
         e.preventDefault();
         setLoading(true);
         try {
-            if (initialData) {
+            if (initialData && !isRestock) {
+                // Only update if it's NOT a restock
                 await WarehouseService.update(initialData.id, formData);
                 showToast('Item actualizado correctamente', 'success');
             } else {
+                // Create new entry (for brand new or restock)
                 await WarehouseService.create(formData);
-                showToast('Item agregado al almacén', 'success');
+                showToast(isRestock ? 'Re-ingreso registrado exitosamente' : 'Item agregado al almacén', 'success');
             }
             onSuccess();
             onClose();
@@ -83,7 +104,9 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                 <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px', overflow: 'hidden' }}>
                     <div className="modal-header bg-dark text-white" style={{ borderTopLeftRadius: '15px', borderTopRightRadius: '15px' }}>
                         <h5 className="modal-title">
-                            {initialData ? '📝 Editar Item' : '📦 Nuevo Item en Almacén'}
+                            {isRestock
+                                ? '🔄 Re-ingreso de Stock'
+                                : (initialData ? '📝 Editar Item' : '📦 Nuevo Item en Almacén')}
                         </h5>
                         <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
                     </div>
@@ -98,6 +121,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         onChange={e => setFormData({ ...formData, nombre: e.target.value })}
                                         placeholder="Ej: Filtro de aceite, Pastillas de freno..."
                                         required autoFocus
+                                        disabled={!!isRestock}
                                     />
                                 </div>
 
@@ -107,6 +131,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         className="form-select"
                                         value={formData.categoria}
                                         onChange={e => setFormData({ ...formData, categoria: e.target.value as any })}
+                                        disabled={!!isRestock}
                                     >
                                         <option value="Repuesto">Repuesto</option>
                                         <option value="Accesorio">Accesorio</option>
@@ -121,6 +146,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         value={formData.nro_parte}
                                         onChange={e => setFormData({ ...formData, nro_parte: e.target.value })}
                                         placeholder="Opcional"
+                                        disabled={!!isRestock}
                                     />
                                 </div>
 
@@ -175,6 +201,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData }: Pr
                                         value={formData.modelo_moto}
                                         onChange={e => setFormData({ ...formData, modelo_moto: e.target.value })}
                                         placeholder="Ej: MT-03, FZ-25..."
+                                        disabled={!!isRestock}
                                     />
                                 </div>
 

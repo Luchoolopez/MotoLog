@@ -42,13 +42,21 @@ export const ManagementPage = () => {
         }
     ];
 
+    // Bloquear scroll global al montar
+    React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
+
     return (
         <div className="container-fluid flex-grow-1" style={{
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/management-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
-            minHeight: '100vh',
+            // Sin height fija, dejamos que flex-grow del layout se encargue, y el body hidden corta el excedente si lo hubiera (aunque no debería)
             color: 'white'
         }}>
             <Container className="py-5">

@@ -171,7 +171,8 @@ const SeguroPage = () => {
             color: 'white'
         }}>
             <Container className="py-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow"
+                    style={{ backgroundColor: 'rgba(33, 37, 41, 0.95)' }}>
                     <h2 className="mb-0 fw-bold" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
                         🛡️ Gestión de Seguros
                     </h2>
@@ -182,17 +183,18 @@ const SeguroPage = () => {
 
                 <Card className="border-0 shadow-lg" style={{ backgroundColor: 'rgba(33, 37, 41, 0.95)' }}>
                     <Card.Body className="p-0">
-                        <div className="table-responsive">
+                        {/* Desktop Table View */}
+                        <div className="d-none d-md-block" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                             <Table hover variant="dark" className="mb-0 text-white">
                                 <thead className="text-uppercase text-white-50 small bg-black">
                                     <tr>
-                                        <th className="py-3 ps-4">Vencimiento</th>
-                                        <th className="py-3">Moto</th>
-                                        <th className="py-3">Compañía</th>
-                                        <th className="py-3">Cobertura</th>
-                                        <th className="py-3 text-end">Monto</th>
-                                        <th className="py-3 text-center">Estado</th>
-                                        <th className="py-3 text-end pe-4">Acciones</th>
+                                        <th className="py-3 ps-4 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Vencimiento</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Moto</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Compañía</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Cobertura</th>
+                                        <th className="py-3 text-end bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Monto</th>
+                                        <th className="py-3 text-center bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Estado</th>
+                                        <th className="py-3 text-end pe-4 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -203,7 +205,7 @@ const SeguroPage = () => {
                                     ) : (
                                         seguros.map(item => (
                                             <tr key={item.id} className="align-middle">
-                                                <td className="ps-4 text-warning fw-bold">
+                                                <td className="ps-4 text-warning fw-bold text-nowrap">
                                                     {new Date(item.fecha_vencimiento).toLocaleDateString()}
                                                 </td>
                                                 <td>
@@ -233,6 +235,51 @@ const SeguroPage = () => {
                                     )}
                                 </tbody>
                             </Table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="d-md-none p-3">
+                            {loading ? (
+                                <p className="text-center">Cargando...</p>
+                            ) : seguros.length === 0 ? (
+                                <p className="text-center text-muted">No hay registros</p>
+                            ) : (
+                                seguros.map(item => (
+                                    <Card key={item.id} className="mb-3 bg-secondary bg-opacity-25 border-secondary">
+                                        <Card.Body>
+                                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <span className="text-warning fw-bold fs-5">
+                                                    {new Date(item.fecha_vencimiento).toLocaleDateString()}
+                                                </span>
+                                                {item.pagado ? (
+                                                    <Badge bg="success">PAGADO</Badge>
+                                                ) : (
+                                                    <Badge bg="danger">PENDIENTE</Badge>
+                                                )}
+                                            </div>
+                                            <h5 className="card-title fw-bold mb-1">
+                                                {item.moto?.marca} {item.moto?.modelo}
+                                            </h5>
+                                            <p className="text-white-50 small mb-2">{item.moto?.patente}</p>
+
+                                            <div className="d-flex flex-column gap-1 small text-white-50 mb-3">
+                                                <div className="d-flex justify-content-between">
+                                                    <span>Cía: {item.entidad}</span>
+                                                    <Badge bg="info" className="fw-normal">{item.cobertura || '-'}</Badge>
+                                                </div>
+                                            </div>
+
+                                            <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary">
+                                                <span className="fw-bold fs-5">${Number(item.monto).toLocaleString()}</span>
+                                                <div>
+                                                    <Button variant="outline-info" size="sm" className="me-2" onClick={() => handleEdit(item)}>Editar</Button>
+                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(item.id)}>Eliminar</Button>
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                ))
+                            )}
                         </div>
                     </Card.Body>
                 </Card>

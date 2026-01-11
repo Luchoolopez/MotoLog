@@ -1,9 +1,11 @@
 import { Container, Row, Col, Card } from "react-bootstrap";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FinancialReportModal } from "../components/modal/reports/FinancialReportModal";
 
 export const ManagementPage = () => {
     const navigate = useNavigate();
+    const [showReportModal, setShowReportModal] = useState(false);
 
     const options = [
         {
@@ -28,6 +30,14 @@ export const ManagementPage = () => {
             description: "Control de Verificación Técnica Vehicular",
             action: () => navigate('/management/vtv'),
             bgClass: "bg-info",
+            disabled: false
+        },
+        {
+            title: "Reporte de Gastos",
+            icon: "📊",
+            description: "Calculadora de gastos históricos (Combustible, Seguros, Patentes)",
+            action: () => setShowReportModal(true),
+            bgClass: "bg-secondary",
             disabled: false
         }
     ];
@@ -73,6 +83,11 @@ export const ManagementPage = () => {
                     ))}
                 </Row>
             </Container>
+
+            <FinancialReportModal
+                show={showReportModal}
+                onHide={() => setShowReportModal(false)}
+            />
         </div>
     );
 };

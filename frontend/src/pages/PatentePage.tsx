@@ -29,6 +29,7 @@ const PatentePage = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState<number | null>(null);
+    const [isAnnual, setIsAnnual] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -132,6 +133,11 @@ const PatentePage = () => {
             observaciones: item.observaciones || ''
         });
         setEditId(item.id);
+
+        // Detect if it is annual
+        const isAnualItem = item.cuota?.toUpperCase().includes('ANUAL');
+        setIsAnnual(!!isAnualItem);
+
         setIsEditing(true);
         setShowModal(true);
     };
@@ -149,6 +155,7 @@ const PatentePage = () => {
             fecha_pago: '',
             observaciones: ''
         });
+        setIsAnnual(false);
         setIsEditing(false);
         setEditId(null);
     };
@@ -161,6 +168,18 @@ const PatentePage = () => {
         }));
     };
 
+    const handleAnnualToggle = (checked: boolean) => {
+        setIsAnnual(checked);
+        if (checked) {
+            const year = formData.fecha_vencimiento
+                ? parseInt(formData.fecha_vencimiento.split('-')[0])
+                : new Date().getFullYear();
+            setFormData(prev => ({ ...prev, cuota: `ANUAL ${year}` }));
+        } else {
+            setFormData(prev => ({ ...prev, cuota: '' }));
+        }
+    };
+
     return (
         <div className="container-fluid flex-grow-1" style={{
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/garage-bg.png')",
@@ -171,7 +190,8 @@ const PatentePage = () => {
             color: 'white'
         }}>
             <Container className="py-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow"
+                    style={{ backgroundColor: 'rgba(33, 37, 41, 0.95)' }}>
                     <h2 className="mb-0 fw-bold" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
                         📄 Gestión de Patentes
                     </h2>
@@ -182,17 +202,18 @@ const PatentePage = () => {
 
                 <Card className="border-0 shadow-lg" style={{ backgroundColor: 'rgba(33, 37, 41, 0.95)' }}>
                     <Card.Body className="p-0">
-                        <div className="table-responsive">
+                        {/* Desktop Table View */}
+                        <div className="d-none d-md-block" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                             <Table hover variant="dark" className="mb-0 text-white">
                                 <thead className="text-uppercase text-white-50 small bg-black">
                                     <tr>
-                                        <th className="py-3 ps-4">Vencimiento</th>
-                                        <th className="py-3">Moto</th>
-                                        <th className="py-3">Cuota</th>
-                                        <th className="py-3 text-end">Monto</th>
-                                        <th className="py-3 text-center">Estado</th>
-                                        <th className="py-3">Fecha Pago</th>
-                                        <th className="py-3 text-end pe-4">Acciones</th>
+                                        <th className="py-3 ps-4 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Vencimiento</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Moto</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Cuota</th>
+                                        <th className="py-3 text-end bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Monto</th>
+                                        <th className="py-3 text-center bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Estado</th>
+                                        <th className="py-3 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Fecha Pago</th>
+                                        <th className="py-3 text-end pe-4 bg-black" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -203,7 +224,7 @@ const PatentePage = () => {
                                     ) : (
                                         patentes.map(item => (
                                             <tr key={item.id} className="align-middle">
-                                                <td className="ps-4 text-warning fw-bold">
+                                                <td className="ps-4 text-warning fw-bold text-nowrap">
                                                     {new Date(item.fecha_vencimiento).toLocaleDateString()}
                                                 </td>
                                                 <td>
@@ -223,7 +244,7 @@ const PatentePage = () => {
                                                         <Badge bg="danger">PENDIENTE</Badge>
                                                     )}
                                                 </td>
-                                                <td>
+                                                <td className="text-nowrap">
                                                     {item.pagado && item.fecha_pago ? new Date(item.fecha_pago).toLocaleDateString() : '-'}
                                                 </td>
                                                 <td className="text-end pe-4">
@@ -235,6 +256,48 @@ const PatentePage = () => {
                                     )}
                                 </tbody>
                             </Table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="d-md-none p-3">
+                            {loading ? (
+                                <p className="text-center">Cargando...</p>
+                            ) : patentes.length === 0 ? (
+                                <p className="text-center text-muted">No hay registros</p>
+                            ) : (
+                                patentes.map(item => (
+                                    <Card key={item.id} className="mb-3 bg-secondary bg-opacity-25 border-secondary">
+                                        <Card.Body>
+                                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <span className="text-warning fw-bold fs-5">
+                                                    {new Date(item.fecha_vencimiento).toLocaleDateString()}
+                                                </span>
+                                                {item.pagado ? (
+                                                    <Badge bg="success">PAGADO</Badge>
+                                                ) : (
+                                                    <Badge bg="danger">PENDIENTE</Badge>
+                                                )}
+                                            </div>
+                                            <h5 className="card-title fw-bold mb-1">
+                                                {item.moto?.marca} {item.moto?.modelo}
+                                            </h5>
+                                            <p className="text-white-50 small mb-2">{item.moto?.patente}</p>
+
+                                            <div className="d-flex justify-content-between small text-white-50 mb-3">
+                                                <span>Cuota: {item.cuota || 'N/A'}</span>
+                                            </div>
+
+                                            <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary">
+                                                <span className="fw-bold fs-5">${Number(item.monto).toLocaleString()}</span>
+                                                <div>
+                                                    <Button variant="outline-info" size="sm" className="me-2" onClick={() => handleEdit(item)}>Editar</Button>
+                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(item.id)}>Eliminar</Button>
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                ))
+                            )}
                         </div>
                     </Card.Body>
                 </Card>
@@ -266,10 +329,22 @@ const PatentePage = () => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group>
-                                    <Form.Label>Cuota / Periodo</Form.Label>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <Form.Label className="mb-0">Cuota / Periodo</Form.Label>
+                                        <div className="form-check form-switch small">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="annualSwitch"
+                                                checked={isAnnual}
+                                                onChange={e => handleAnnualToggle(e.target.checked)}
+                                            />
+                                            <label className="form-check-label text-info" htmlFor="annualSwitch" style={{ fontSize: '0.8rem' }}>Pago Anual</label>
+                                        </div>
+                                    </div>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ej: 01/2026"
+                                        placeholder={isAnnual ? "ANUAL 202X" : "Ej: 01/2026"}
                                         value={formData.cuota || ''}
                                         onChange={e => setFormData({ ...formData, cuota: e.target.value })}
                                         className="bg-secondary text-white border-0"

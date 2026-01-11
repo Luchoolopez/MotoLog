@@ -368,44 +368,44 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                             </h1>
                         </div>
 
-                        <Row className="g-3">
-                            <Col md>
+                        <Row className="g-2 justify-content-center">
+                            <Col xs={6} md={2}>
                                 <Card className="bg-dark border border-success h-100 shadow-sm" style={{ borderColor: '#198754' }}>
-                                    <Card.Body className="text-center p-3">
-                                        <small className="text-success fw-bold text-uppercase d-block mb-1">Almacén</small>
-                                        <h4 className="fw-bold text-white mb-0">${breakdown.warehouse.toLocaleString('es-AR')}</h4>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-success fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Almacén</small>
+                                        <h5 className="fw-bold text-white mb-0">${breakdown.warehouse.toLocaleString('es-AR')}</h5>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col md>
+                            <Col xs={6} md={2}>
                                 <Card className="bg-dark border border-danger h-100 shadow-sm" style={{ borderColor: '#dc3545' }}>
-                                    <Card.Body className="text-center p-3">
-                                        <small className="text-danger fw-bold text-uppercase d-block mb-1">Combustible</small>
-                                        <h4 className="fw-bold text-white mb-0">${breakdown.fuel.toLocaleString('es-AR')}</h4>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-danger fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Combustible</small>
+                                        <h5 className="fw-bold text-white mb-0">${breakdown.fuel.toLocaleString('es-AR')}</h5>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col md>
+                            <Col xs={6} md={2}>
                                 <Card className="bg-dark border border-info h-100 shadow-sm" style={{ borderColor: '#0dcaf0' }}>
-                                    <Card.Body className="text-center p-3">
-                                        <small className="text-info fw-bold text-uppercase d-block mb-1">Seguro</small>
-                                        <h4 className="fw-bold text-white mb-0">${breakdown.insurance.toLocaleString('es-AR')}</h4>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-info fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Seguro</small>
+                                        <h5 className="fw-bold text-white mb-0">${breakdown.insurance.toLocaleString('es-AR')}</h5>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col md>
+                            <Col xs={6} md={2}>
                                 <Card className="bg-dark border border-warning h-100 shadow-sm" style={{ borderColor: '#ffc107' }}>
-                                    <Card.Body className="text-center p-3">
-                                        <small className="text-warning fw-bold text-uppercase d-block mb-1">Patente</small>
-                                        <h4 className="fw-bold text-white mb-0">${breakdown.patente.toLocaleString('es-AR')}</h4>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-warning fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Patente</small>
+                                        <h5 className="fw-bold text-white mb-0">${breakdown.patente.toLocaleString('es-AR')}</h5>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col md>
+                            <Col xs={6} md={2}>
                                 <Card className="bg-dark border border-primary h-100 shadow-sm" style={{ borderColor: '#0d6efd' }}>
-                                    <Card.Body className="text-center p-3">
-                                        <small className="text-primary fw-bold text-uppercase d-block mb-1">VTV</small>
-                                        <h4 className="fw-bold text-white mb-0">${breakdown.vtv.toLocaleString('es-AR')}</h4>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-primary fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>VTV</small>
+                                        <h5 className="fw-bold text-white mb-0">${breakdown.vtv.toLocaleString('es-AR')}</h5>
                                     </Card.Body>
                                 </Card>
                             </Col>

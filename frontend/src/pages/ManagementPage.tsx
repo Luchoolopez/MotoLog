@@ -35,7 +35,7 @@ export const ManagementPage = () => {
         {
             title: "Reporte de Gastos",
             icon: "📊",
-            description: "Calculadora de gastos históricos (Combustible, Seguros, Patentes)",
+            description: "Calculadora de gastos históricos",
             action: () => setShowReportModal(true),
             bgClass: "bg-secondary",
             disabled: false
@@ -56,9 +56,9 @@ export const ManagementPage = () => {
                     ⚙️ Gestión de Documentación
                 </h1>
 
-                <Row className="justify-content-center g-4">
+                <Row className="justify-content-center g-3">
                     {options.map((option, idx) => (
-                        <Col key={idx} md={4} >
+                        <Col key={idx} xs={12} md>
                             <Card
                                 className="h-100 border-0 shadow-lg text-white"
                                 style={{
@@ -72,10 +72,10 @@ export const ManagementPage = () => {
                                 onMouseOver={(e: React.MouseEvent<HTMLElement>) => !option.disabled && (e.currentTarget.style.transform = 'translateY(-5px)')}
                                 onMouseOut={(e: React.MouseEvent<HTMLElement>) => !option.disabled && (e.currentTarget.style.transform = 'translateY(0)')}
                             >
-                                <Card.Body className="text-center p-5 d-flex flex-column align-items-center justify-content-center">
-                                    <div className="display-1 mb-3">{option.icon}</div>
-                                    <h3 className="card-title fw-bold mb-3">{option.title}</h3>
-                                    <p className="card-text text-white-50 mb-0">{option.description}</p>
+                                <Card.Body className="text-center p-3 d-flex flex-column align-items-center justify-content-center">
+                                    <div className="display-4 mb-2">{option.icon}</div>
+                                    <h5 className="card-title fw-bold mb-2">{option.title}</h5>
+                                    <p className="card-text text-white-50 mb-0 small">{option.description}</p>
                                     {option.disabled && <small className="text-warning mt-3 border border-warning rounded px-2 py-1">Próximamente</small>}
                                 </Card.Body>
                             </Card>

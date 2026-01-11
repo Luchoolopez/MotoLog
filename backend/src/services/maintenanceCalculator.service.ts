@@ -130,6 +130,29 @@ export class MaintenanceCalculatorService {
                 intervalo_meses: item.intervalo_meses
             });
         }
+
+        // Order: VENCIDO > ALERTA > OK
+        // Inside group: "More overdue" (smaller km_restantes) first
+        const statusPriority = { 'VENCIDO': 0, 'ALERTA': 1, 'OK': 2 };
+
+        resultados.sort((a, b) => {
+            // 1. Sort by Status Priority
+            const priorityA = statusPriority[a.estado];
+            const priorityB = statusPriority[b.estado];
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
+            // 2. Sort by Km Restantes (Ascending -> more negative first)
+            // This works for "More Overdue" because -2000 < -100
+            if (a.km_restantes !== b.km_restantes) {
+                return a.km_restantes - b.km_restantes;
+            }
+
+            // 3. Fallback: Sort by Days Restantes (Ascending)
+            return a.dias_restantes - b.dias_restantes;
+        });
+
         return resultados;
     }
 }

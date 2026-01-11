@@ -346,7 +346,7 @@ const PatentePage = () => {
                                         type="text"
                                         placeholder={isAnnual ? "ANUAL 202X" : "Ej: 01/2026"}
                                         value={formData.cuota || ''}
-                                        onChange={e => setFormData({ ...formData, cuota: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, cuota: e.target.value.toUpperCase() })}
                                         className="bg-secondary text-white border-0"
                                     />
                                 </Form.Group>

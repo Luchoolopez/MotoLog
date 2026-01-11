@@ -144,7 +144,7 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                     <input
                                         type="text" className="form-control"
                                         value={formData.entidad}
-                                        onChange={e => setFormData({ ...formData, entidad: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, entidad: e.target.value.toUpperCase() })}
                                         placeholder="Ej: AGIP, La Caja, Rivadavia..."
                                         required
                                     />
@@ -155,7 +155,7 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                     <input
                                         type="text" className="form-control"
                                         value={formData.nro_documento}
-                                        onChange={e => setFormData({ ...formData, nro_documento: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nro_documento: e.target.value.toUpperCase() })}
                                         placeholder="Nro de póliza o partida..."
                                         required
                                     />
@@ -191,7 +191,7 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                             <input
                                                 type="text" className="form-control"
                                                 value={formData.cuota || ''}
-                                                onChange={e => setFormData({ ...formData, cuota: e.target.value })}
+                                                onChange={e => setFormData({ ...formData, cuota: e.target.value.toUpperCase() })}
                                                 placeholder="Ej: Cuota 1, Cuota 2..."
                                             />
                                         </div>
@@ -219,7 +219,7 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                         <input
                                             type="text" className="form-control"
                                             value={formData.cobertura || ''}
-                                            onChange={e => setFormData({ ...formData, cobertura: e.target.value })}
+                                            onChange={e => setFormData({ ...formData, cobertura: e.target.value.toUpperCase() })}
                                             placeholder="Ej: Terceros completo, Todo riesgo..."
                                         />
                                     </div>
@@ -231,7 +231,7 @@ export const LicenseInsuranceModal = ({ show, onClose, onSuccess, initialData }:
                                         className="form-control"
                                         rows={2}
                                         value={formData.observaciones}
-                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value.toUpperCase() })}
                                         placeholder="Detalles adicionales..."
                                     ></textarea>
                                 </div>

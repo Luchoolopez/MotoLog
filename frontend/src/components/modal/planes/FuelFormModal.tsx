@@ -114,7 +114,7 @@ export const FuelFormModal = ({ show, onClose, motoId, currentKm, initialData, o
                             </div>
                             <div className="mb-3">
                                 <label className="form-label">Empresa (Estación de servicio)</label>
-                                <input type="text" className="form-control" placeholder="Ej: YPF, Shell, Axion..." value={empresa} onChange={e => setEmpresa(e.target.value)} required />
+                                <input type="text" className="form-control" placeholder="Ej: YPF, Shell, Axion..." value={empresa} onChange={e => setEmpresa(e.target.value.toUpperCase())} required />
                             </div>
                             <div className="alert alert-secondary text-center mb-0">
                                 <small>Costo Total:</small>

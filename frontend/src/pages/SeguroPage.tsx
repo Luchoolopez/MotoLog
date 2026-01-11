@@ -316,7 +316,7 @@ const SeguroPage = () => {
                                         type="text"
                                         placeholder="Ej: ATM, Fedora..."
                                         value={formData.entidad}
-                                        onChange={e => setFormData({ ...formData, entidad: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, entidad: e.target.value.toUpperCase() })}
                                         required
                                         className="bg-secondary text-white border-0"
                                     />
@@ -329,7 +329,7 @@ const SeguroPage = () => {
                                         type="text"
                                         placeholder="Ej: Robo + Incendio"
                                         value={formData.cobertura || ''}
-                                        onChange={e => setFormData({ ...formData, cobertura: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, cobertura: e.target.value.toUpperCase() })}
                                         className="bg-secondary text-white border-0"
                                     />
                                 </Form.Group>

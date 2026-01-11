@@ -118,7 +118,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                     <input
                                         type="text" className="form-control"
                                         value={formData.nombre}
-                                        onChange={e => setFormData({ ...formData, nombre: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nombre: e.target.value.toUpperCase() })}
                                         placeholder="Ej: Filtro de aceite, Pastillas de freno..."
                                         required autoFocus
                                         disabled={!!isRestock}
@@ -144,7 +144,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                     <input
                                         type="text" className="form-control"
                                         value={formData.nro_parte}
-                                        onChange={e => setFormData({ ...formData, nro_parte: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nro_parte: e.target.value.toUpperCase() })}
                                         placeholder="Opcional"
                                         disabled={!!isRestock}
                                     />
@@ -190,7 +190,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                     <input
                                         type="text" className="form-control"
                                         value={formData.lugar_compra}
-                                        onChange={e => setFormData({ ...formData, lugar_compra: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, lugar_compra: e.target.value.toUpperCase() })}
                                         placeholder="Ej: Mercado Libre, Local..."
                                     />
                                 </div>
@@ -199,7 +199,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                     <input
                                         type="text" className="form-control"
                                         value={formData.modelo_moto}
-                                        onChange={e => setFormData({ ...formData, modelo_moto: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, modelo_moto: e.target.value.toUpperCase() })}
                                         placeholder="Ej: MT-03, FZ-25..."
                                         disabled={!!isRestock}
                                     />
@@ -211,7 +211,7 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                         className="form-control"
                                         rows={2}
                                         value={formData.observaciones}
-                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value.toUpperCase() })}
                                         placeholder="Detalles adicionales..."
                                     ></textarea>
                                 </div>

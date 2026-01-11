@@ -46,7 +46,7 @@ const RegisterPage: React.FC = () => {
                     id="name"
                     name="name"
                     value={formData.name}
-                    onChange={handleChange}
+                    onChange={e => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
                     required
                   />
                 </div>

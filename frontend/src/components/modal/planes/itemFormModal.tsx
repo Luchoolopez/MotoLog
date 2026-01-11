@@ -69,7 +69,7 @@ export const ItemFormModal = ({ show, onClose, planId, onSubmit, onSuccess }: Pr
                                     type="text" className="form-control"
                                     placeholder="Ej: Cambio de Aceite"
                                     value={formData.tarea}
-                                    onChange={e => setFormData({ ...formData, tarea: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, tarea: e.target.value.toUpperCase() })}
                                     autoFocus required
                                 />
                             </div>

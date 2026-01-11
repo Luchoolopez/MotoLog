@@ -249,7 +249,7 @@ export const RegisterServiceModal = ({ show, onClose, motoId, itemId, taskName, 
                                     className="form-control"
                                     rows={2}
                                     value={formData.observaciones}
-                                    onChange={e => setFormData({ ...formData, observaciones: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, observaciones: e.target.value.toUpperCase() })}
                                 ></textarea>
                             </div>
 

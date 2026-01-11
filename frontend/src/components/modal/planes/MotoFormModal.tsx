@@ -50,12 +50,12 @@ export const MotoFormModal = ({ show, onClose, onSubmit }: Props) => {
                                 <div className="col-6 mb-3">
                                     <label className="form-label">Marca</label>
                                     <input type="text" className="form-control" placeholder="Honda"
-                                        value={formData.marca} onChange={e => setFormData({ ...formData, marca: e.target.value })} required />
+                                        value={formData.marca} onChange={e => setFormData({ ...formData, marca: e.target.value.toUpperCase() })} required />
                                 </div>
                                 <div className="col-6 mb-3">
                                     <label className="form-label">Modelo</label>
                                     <input type="text" className="form-control" placeholder="XR 150"
-                                        value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value })} required />
+                                        value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value.toUpperCase() })} required />
                                 </div>
 
                                 <div className="mb-3">
@@ -76,7 +76,7 @@ export const MotoFormModal = ({ show, onClose, onSubmit }: Props) => {
                             <div className="mb-3">
                                 <label className="form-label">Patente</label>
                                 <input type="text" className="form-control" placeholder="A123XYZ"
-                                    value={formData.patente} onChange={e => setFormData({ ...formData, patente: e.target.value })} />
+                                    value={formData.patente} onChange={e => setFormData({ ...formData, patente: e.target.value.toUpperCase() })} />
                             </div>
 
                             <div className="row g-2">
@@ -97,6 +97,7 @@ export const MotoFormModal = ({ show, onClose, onSubmit }: Props) => {
                                     <input type="date" className="form-control"
                                         max={new Date().toISOString().split('T')[0]}
                                         value={formData.fecha_compra} onChange={e => setFormData({ ...formData, fecha_compra: e.target.value })} />
+
                                 </div>
                             </div>
                         </div>

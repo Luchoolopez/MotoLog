@@ -313,7 +313,7 @@ const VTVPage = () => {
                                         type="text"
                                         placeholder="Ej: Planta Munro, CABA..."
                                         value={formData.entidad}
-                                        onChange={e => setFormData({ ...formData, entidad: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, entidad: e.target.value.toUpperCase() })}
                                         className="bg-secondary text-white border-0"
                                     />
                                 </Form.Group>
@@ -325,7 +325,7 @@ const VTVPage = () => {
                                         type="text"
                                         placeholder="Opcional"
                                         value={formData.nro_documento}
-                                        onChange={e => setFormData({ ...formData, nro_documento: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nro_documento: e.target.value.toUpperCase() })}
                                         className="bg-secondary text-white border-0"
                                     />
                                 </Form.Group>
@@ -397,7 +397,7 @@ const VTVPage = () => {
                                         rows={2}
                                         placeholder="Notas adicionales..."
                                         value={formData.observaciones || ''}
-                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, observaciones: e.target.value.toUpperCase() })}
                                         className="bg-secondary text-white border-0"
                                     />
                                 </Form.Group>

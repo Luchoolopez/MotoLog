@@ -33,6 +33,14 @@ export const ManagementPage = () => {
             disabled: false
         },
         {
+            title: "Multas y Service",
+            icon: "👮",
+            description: "Gestiona multas, infracciones y services",
+            action: () => navigate('/management/fines'),
+            bgClass: "bg-danger",
+            disabled: false
+        },
+        {
             title: "Reporte de Gastos",
             icon: "📊",
             description: "Calculadora de gastos históricos",

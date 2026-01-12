@@ -10,6 +10,7 @@ import { ManagementPage } from '../pages/ManagementPage';
 import PatentePage from '../pages/PatentePage';
 import SeguroPage from '../pages/SeguroPage';
 import VTVPage from '../pages/VTVPage';
+import FinesPage from '../pages/FinesPage';
 
 
 export function AppRouter() {
@@ -51,6 +52,11 @@ export function AppRouter() {
                 <Route path='/management/vtv' element={
                     <ProtectedRoute>
                         <VTVPage />
+                    </ProtectedRoute>
+                } />
+                <Route path='/management/fines' element={
+                    <ProtectedRoute>
+                        <FinesPage />
                     </ProtectedRoute>
                 } />
             </Route>

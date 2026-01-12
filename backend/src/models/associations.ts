@@ -9,6 +9,7 @@ import { WarehouseItem } from "./warehouse_item.model";
 import { ItemPlanWarehouse } from "./item_plan_warehouse.model";
 import { MaintenanceHistoryConsumption } from "./maintenance_history_consumption.model";
 import { LicenseInsurance } from "./license_insurance.model";
+import { Fine } from "./fine.model";
 
 
 export const setupAssociations = () => {
@@ -159,6 +160,16 @@ export const setupAssociations = () => {
         as: 'documentos'
     });
     LicenseInsurance.belongsTo(Motorcycle, {
+        foreignKey: 'moto_id',
+        as: 'moto'
+    });
+
+    // --- 13. Moto <-> Fine (Uno a Muchos) ---
+    Motorcycle.hasMany(Fine, {
+        foreignKey: 'moto_id',
+        as: 'multas'
+    });
+    Fine.belongsTo(Motorcycle, {
         foreignKey: 'moto_id',
         as: 'moto'
     });

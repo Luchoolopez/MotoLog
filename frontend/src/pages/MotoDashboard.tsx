@@ -191,6 +191,9 @@ export const MotoDashboard = () => {
                         <button className="btn btn-outline-success btn-sm flex-grow-1" onClick={() => setShowFuelHistoryModal(true)}>
                             ⛽ Historial
                         </button>
+                        <Link to="/management/fines" className="btn btn-outline-light btn-sm flex-grow-1 text-decoration-none pt-1">
+                            👮 Multas y Service
+                        </Link>
                         <button className="btn btn-success btn-sm flex-grow-1" onClick={() => setShowFuelFormModal(true)}>
                             + Nafta
                         </button>

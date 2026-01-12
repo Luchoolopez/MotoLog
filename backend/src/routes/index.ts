@@ -9,6 +9,7 @@ import OdometerHistoryRoutes from "./odometerHistory.routes";
 import FuelRoutes from "./fuel";
 import warehouseRoutes from './warehouse';
 import LicenseInsuranceRoutes from './license_insurance';
+import FineRoutes from './fine';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/fuel', FuelRoutes);
 router.use('/warehouse', warehouseRoutes);
 console.log('[DEBUG] Registering /docs route');
 router.use('/docs', LicenseInsuranceRoutes);
+router.use('/fines', FineRoutes);
 
 export default router;

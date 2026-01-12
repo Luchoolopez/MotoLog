@@ -47,7 +47,7 @@ const FinesPage = () => {
                     console.warn(`Could not fetch fines for moto ${m.id}`, err);
                 }
             }
-            setFines(allFines);
+            setFines(allFines.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         } catch (error) {
             console.error("Error fetching data", error);
             showToast('Error al cargar datos. Verifica la conexión.', 'error');

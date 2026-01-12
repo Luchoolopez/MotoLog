@@ -4,6 +4,7 @@ import { MotoService } from '../../../services/moto.service';
 import { FuelService } from '../../../services/fuel.service';
 import { LicenseInsuranceService } from '../../../services/licenseInsurance.service';
 import { WarehouseService } from '../../../services/warehouse.service';
+import { FineService } from '../../../services/fine.service';
 import type { Motorcycle } from '../../../types/moto.types';
 
 interface FinancialReportModalProps {
@@ -17,7 +18,6 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
     const [calculating, setCalculating] = useState(false);
 
     // Filters
-    // Filters
     const [selectedMotoId, setSelectedMotoId] = useState<number>(0);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -27,10 +27,11 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
     const [includePatente, setIncludePatente] = useState(true);
     const [includeVTV, setIncludeVTV] = useState(true);
     const [includeWarehouse, setIncludeWarehouse] = useState(true);
+    const [includeFines, setIncludeFines] = useState(true);
 
     // Results
     const [totalCost, setTotalCost] = useState<number | null>(null);
-    const [breakdown, setBreakdown] = useState({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0 });
+    const [breakdown, setBreakdown] = useState({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0, fines: 0 });
 
     useEffect(() => {
         if (show) {
@@ -53,7 +54,7 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
 
     const resetResults = () => {
         setTotalCost(null);
-        setBreakdown({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0 });
+        setBreakdown({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0, fines: 0 });
     };
 
     const handleCalculate = async () => {
@@ -65,16 +66,15 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
         let patenteTotal = 0;
         let vtvTotal = 0;
         let warehouseTotal = 0;
+        let finesTotal = 0;
 
         try {
             // 1. Calculate Fuel
             if (includeFuel) {
                 let fuelRecords: any[] = [];
                 if (selectedMotoId === 0) {
-                    // Fetch for all motos
                     const promises = motos.map(m => FuelService.getByMotoId(m.id));
                     const results = await Promise.all(promises);
-                    // results is array of { history: [...] }
                     results.forEach(res => {
                         if (res && res.history) fuelRecords.push(...res.history);
                     });
@@ -82,33 +82,10 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                     const res = await FuelService.getByMotoId(selectedMotoId);
                     if (res && res.history) fuelRecords = res.history;
                 }
-
-                // Filter by date
-                // Filter by date
-                if (startDate || endDate) {
-                    fuelRecords = fuelRecords.filter(r => {
-                        const rDate = new Date(r.fecha);
-                        rDate.setHours(0, 0, 0, 0);
-
-                        let valid = true;
-                        if (startDate) {
-                            const start = new Date(startDate);
-                            start.setHours(0, 0, 0, 0);
-                            if (rDate < start) valid = false;
-                        }
-                        if (endDate) {
-                            const end = new Date(endDate);
-                            end.setHours(0, 0, 0, 0);
-                            if (rDate > end) valid = false;
-                        }
-                        return valid;
-                    });
-                }
-
-                fuelTotal = fuelRecords.reduce((sum, r) => sum + Number(r.total), 0);
+                fuelTotal = filterAndSum(fuelRecords, 'total', 'fecha');
             }
 
-            // 2. Fetch Docs (Insurance & Patente)
+            // 2. Fetch Docs (Insurance & Patente & VTV)
             let docs: any[] = [];
             if (selectedMotoId === 0) {
                 docs = await LicenseInsuranceService.getAll();
@@ -116,122 +93,61 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                 docs = await LicenseInsuranceService.getByMoto(selectedMotoId);
             }
 
-            // Calculate Insurance
             if (includeInsurance) {
-                let insDocs = docs.filter(d => d.tipo === 'Seguro' && d.pagado);
-                if (startDate || endDate) {
-                    insDocs = insDocs.filter(d => {
-                        if (!d.fecha_pago) return false;
-                        const pDate = new Date(d.fecha_pago);
-                        pDate.setHours(0, 0, 0, 0);
-
-                        let valid = true;
-                        if (startDate) {
-                            const start = new Date(startDate);
-                            start.setHours(0, 0, 0, 0);
-                            if (pDate < start) valid = false;
-                        }
-                        if (endDate) {
-                            const end = new Date(endDate);
-                            end.setHours(0, 0, 0, 0);
-                            if (pDate > end) valid = false;
-                        }
-                        return valid;
-                    });
-                }
-                insuranceTotal = insDocs.reduce((sum, d) => sum + Number(d.monto), 0);
+                const insDocs = docs.filter(d => d.tipo === 'Seguro' && d.pagado);
+                insuranceTotal = filterAndSum(insDocs, 'monto', 'fecha_pago');
             }
-
-            // Calculate Patente
             if (includePatente) {
-                let patDocs = docs.filter(d => d.tipo === 'Patente' && d.pagado);
-                if (startDate || endDate) {
-                    patDocs = patDocs.filter(d => {
-                        if (!d.fecha_pago) return false;
-                        const pDate = new Date(d.fecha_pago);
-                        pDate.setHours(0, 0, 0, 0);
-
-                        let valid = true;
-                        if (startDate) {
-                            const start = new Date(startDate);
-                            start.setHours(0, 0, 0, 0);
-                            if (pDate < start) valid = false;
-                        }
-                        if (endDate) {
-                            const end = new Date(endDate);
-                            end.setHours(0, 0, 0, 0);
-                            if (pDate > end) valid = false;
-                        }
-                        return valid;
-                    });
-                }
-                patenteTotal = patDocs.reduce((sum, d) => sum + Number(d.monto), 0);
+                const patDocs = docs.filter(d => d.tipo === 'Patente' && d.pagado);
+                patenteTotal = filterAndSum(patDocs, 'monto', 'fecha_pago');
             }
-
-            // Calculate VTV
             if (includeVTV) {
-                let vtvDocs = docs.filter(d => d.tipo === 'VTV' && d.pagado);
-                if (startDate || endDate) {
-                    vtvDocs = vtvDocs.filter(d => {
-                        if (!d.fecha_pago) return false;
-                        const pDate = new Date(d.fecha_pago);
-                        pDate.setHours(0, 0, 0, 0);
-
-                        let valid = true;
-                        if (startDate) {
-                            const start = new Date(startDate);
-                            start.setHours(0, 0, 0, 0);
-                            if (pDate < start) valid = false;
-                        }
-                        if (endDate) {
-                            const end = new Date(endDate);
-                            end.setHours(0, 0, 0, 0);
-                            if (pDate > end) valid = false;
-                        }
-                        return valid;
-                    });
-                }
-                vtvTotal = vtvDocs.reduce((sum, d) => sum + Number(d.monto), 0);
+                const vtvDocs = docs.filter(d => d.tipo === 'VTV' && d.pagado);
+                vtvTotal = filterAndSum(vtvDocs, 'monto', 'fecha_pago');
             }
 
-            // Calculate Warehouse
+            // 3. Warehouse
             if (includeWarehouse) {
                 let warehouseItems = await WarehouseService.getAll();
-
-                // Filter by Moto (using Modelo name as link)
                 if (selectedMotoId !== 0) {
                     const selectedMoto = motos.find(m => m.id === selectedMotoId);
                     if (selectedMoto) {
                         warehouseItems = warehouseItems.filter(item => item.modelo_moto === selectedMoto.modelo);
                     }
                 }
-
-                // Filter by Date
-                if (startDate || endDate) {
-                    warehouseItems = warehouseItems.filter(item => {
-                        const iDate = new Date(item.fecha_compra);
-                        iDate.setHours(0, 0, 0, 0);
-
-                        let valid = true;
-                        if (startDate) {
-                            const start = new Date(startDate);
-                            start.setHours(0, 0, 0, 0);
-                            if (iDate < start) valid = false;
-                        }
-                        if (endDate) {
-                            const end = new Date(endDate);
-                            end.setHours(0, 0, 0, 0);
-                            if (iDate > end) valid = false;
-                        }
-                        return valid;
-                    });
-                }
-
+                // Custom sum logic for warehouse (price * qty)
+                warehouseItems = filterByDate(warehouseItems, 'fecha_compra');
                 warehouseTotal = warehouseItems.reduce((sum, item) => sum + (Number(item.precio_compra) * Number(item.cantidad)), 0);
             }
 
-            setBreakdown({ fuel: fuelTotal, insurance: insuranceTotal, patente: patenteTotal, vtv: vtvTotal, warehouse: warehouseTotal });
-            setTotalCost(fuelTotal + insuranceTotal + patenteTotal + vtvTotal + warehouseTotal);
+            // 4. Fines & Service
+            if (includeFines) {
+                let fineRecords: any[] = [];
+                if (selectedMotoId === 0) {
+                    for (const m of motos) {
+                        try {
+                            const f = await FineService.getAllByMoto(m.id);
+                            fineRecords.push(...f);
+                        } catch (e) { console.warn(e); }
+                    }
+                } else {
+                    try {
+                        fineRecords = await FineService.getAllByMoto(selectedMotoId);
+                    } catch (e) { console.warn(e); }
+                }
+                // Filter only 'Pagado' or allow all? Typically 'Multas' might be pending. 
+                // Requests usually imply "Spent", so maybe filter by status='Pagado'?
+                // Or maybe the user wants to see debt? 
+                // The report title is "Gastos". Usually implies spent money.
+                // However, 'Service' is usually immediate.
+                // Let's Include EVERYTHING for now, or maybe just non-anulated?
+                // Let's include everything except 'Anulado'.
+                fineRecords = fineRecords.filter(r => r.status !== 'Anulado');
+                finesTotal = filterAndSum(fineRecords, 'amount', 'date');
+            }
+
+            setBreakdown({ fuel: fuelTotal, insurance: insuranceTotal, patente: patenteTotal, vtv: vtvTotal, warehouse: warehouseTotal, fines: finesTotal });
+            setTotalCost(fuelTotal + insuranceTotal + patenteTotal + vtvTotal + warehouseTotal + finesTotal);
 
         } catch (error) {
             console.error("Error calculating expenses", error);
@@ -239,6 +155,34 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
             setCalculating(false);
         }
     };
+
+    // Helper to reduce code duplication
+    const filterByDate = (items: any[], dateField: string) => {
+        if (!startDate && !endDate) return items;
+        return items.filter(item => {
+            if (!item[dateField]) return false;
+            const itemDate = new Date(item[dateField]);
+            itemDate.setHours(0, 0, 0, 0);
+
+            let valid = true;
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                if (itemDate < start) valid = false;
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(0, 0, 0, 0);
+                if (itemDate > end) valid = false;
+            }
+            return valid;
+        });
+    }
+
+    const filterAndSum = (items: any[], amountField: string, dateField: string) => {
+        const filtered = filterByDate(items, dateField);
+        return filtered.reduce((sum, item) => sum + Number(item[amountField] || 0), 0);
+    }
 
     return (
         <Modal show={show} onHide={onHide} centered size="lg" contentClassName="bg-dark text-white border border-secondary shadow-lg">
@@ -346,6 +290,16 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                                         className="fs-6 text-white"
                                     />
                                 </Col>
+                                <Col xs={6} md={3}>
+                                    <Form.Check
+                                        type="switch"
+                                        id="fines-switch"
+                                        label="Multas y Sv"
+                                        checked={includeFines}
+                                        onChange={(e) => setIncludeFines(e.target.checked)}
+                                        className="fs-6 text-white"
+                                    />
+                                </Col>
                             </Row>
                         </Card.Body>
                     </Card>
@@ -369,43 +323,52 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                         </div>
 
                         <Row className="g-2 justify-content-center">
-                            <Col xs={6} md={2}>
-                                <Card className="bg-dark border border-success h-100 shadow-sm" style={{ borderColor: '#198754' }}>
-                                    <Card.Body className="text-center p-2">
-                                        <small className="text-success fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Almacén</small>
-                                        <h5 className="fw-bold text-white mb-0">${breakdown.warehouse.toLocaleString('es-AR')}</h5>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <Col xs={6} md={2}>
+                            {/* Ordered compact cards */}
+                            <Col xs={4} md={2}>
                                 <Card className="bg-dark border border-danger h-100 shadow-sm" style={{ borderColor: '#dc3545' }}>
                                     <Card.Body className="text-center p-2">
-                                        <small className="text-danger fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Combustible</small>
-                                        <h5 className="fw-bold text-white mb-0">${breakdown.fuel.toLocaleString('es-AR')}</h5>
+                                        <small className="text-danger fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>Combustible</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.fuel.toLocaleString('es-AR')}</h6>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col xs={6} md={2}>
+                            <Col xs={4} md={2}>
                                 <Card className="bg-dark border border-info h-100 shadow-sm" style={{ borderColor: '#0dcaf0' }}>
                                     <Card.Body className="text-center p-2">
-                                        <small className="text-info fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Seguro</small>
-                                        <h5 className="fw-bold text-white mb-0">${breakdown.insurance.toLocaleString('es-AR')}</h5>
+                                        <small className="text-info fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>Seguro</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.insurance.toLocaleString('es-AR')}</h6>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col xs={6} md={2}>
+                            <Col xs={4} md={2}>
                                 <Card className="bg-dark border border-warning h-100 shadow-sm" style={{ borderColor: '#ffc107' }}>
                                     <Card.Body className="text-center p-2">
-                                        <small className="text-warning fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>Patente</small>
-                                        <h5 className="fw-bold text-white mb-0">${breakdown.patente.toLocaleString('es-AR')}</h5>
+                                        <small className="text-warning fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>Patente</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.patente.toLocaleString('es-AR')}</h6>
                                     </Card.Body>
                                 </Card>
                             </Col>
-                            <Col xs={6} md={2}>
+                            <Col xs={4} md={2}>
                                 <Card className="bg-dark border border-primary h-100 shadow-sm" style={{ borderColor: '#0d6efd' }}>
                                     <Card.Body className="text-center p-2">
-                                        <small className="text-primary fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.7rem' }}>VTV</small>
-                                        <h5 className="fw-bold text-white mb-0">${breakdown.vtv.toLocaleString('es-AR')}</h5>
+                                        <small className="text-primary fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>VTV</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.vtv.toLocaleString('es-AR')}</h6>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col xs={4} md={2}>
+                                <Card className="bg-dark border border-success h-100 shadow-sm" style={{ borderColor: '#198754' }}>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-success fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>Almacén</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.warehouse.toLocaleString('es-AR')}</h6>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col xs={4} md={2}>
+                                <Card className="bg-dark border border-secondary h-100 shadow-sm" style={{ borderColor: '#adb5bd' }}>
+                                    <Card.Body className="text-center p-2">
+                                        <small className="text-white-50 fw-bold text-uppercase d-block mb-1" style={{ fontSize: '0.65rem' }}>Multas y Sv</small>
+                                        <h6 className="fw-bold text-white mb-0">${breakdown.fines.toLocaleString('es-AR')}</h6>
                                     </Card.Body>
                                 </Card>
                             </Col>

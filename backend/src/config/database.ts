@@ -12,22 +12,20 @@ function requireEnv(key: string): string {
 }
 
 const sequelize = new Sequelize(
-    requireEnv("DB_NAME"),
-    requireEnv("DB_USER"),
-    requireEnv("DB_PASSWORD"),
+    process.env.DATABASE_URL as string,
     {
-        host: requireEnv("DB_HOST"),
-        port: parseInt(process.env.DB_PORT || "3306"),
-        dialect: "mysql",
+        dialect: "postgres",
         logging: NODE_ENV === "development" ? console.log : false,
-        pool: {
-            max: 10,
-            min: 0,
-            acquire: 30000,
-            idle: 10000,
+        protocol: "postgres",
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false,
+            },
         },
     }
 );
+
 
 //esta funcion permite que el mysql se configure primero antes que el back para evitar errores
 async function connectWithRetry(attempts = 5, delay = 3000) {
@@ -35,14 +33,16 @@ async function connectWithRetry(attempts = 5, delay = 3000) {
         try {
             await sequelize.authenticate();
             console.log("✅ DB conectada con Sequelize");
+            await sequelize.sync({ alter: true });
+            console.log("✅ Tablas sincronizadas");
             return true;
         } catch (error) {
             console.error(`❌ Intento ${i}/${attempts} - Error conectando a la DB`);
-            
+
             if (i === attempts) {
                 throw error;
             }
-            
+
             // Espera antes del próximo intento
             await new Promise(resolve => setTimeout(resolve, delay));
         }

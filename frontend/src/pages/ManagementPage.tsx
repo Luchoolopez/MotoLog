@@ -50,13 +50,7 @@ export const ManagementPage = () => {
         }
     ];
 
-    // Bloquear scroll global al montar
-    React.useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, []);
+
 
     return (
         <div className="container-fluid flex-grow-1" style={{

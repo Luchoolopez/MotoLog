@@ -57,7 +57,7 @@ export const ManagementPage = () => {
             backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/assets/management-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
+            // backgroundAttachment: 'fixed', // COMENTADO: Bloquea el scroll en moviles. Si se quiere efecto parallax, usar CSS con media queries.
             // Sin height fija, dejamos que flex-grow del layout se encargue, y el body hidden corta el excedente si lo hubiera (aunque no debería)
             color: 'white'
         }}>

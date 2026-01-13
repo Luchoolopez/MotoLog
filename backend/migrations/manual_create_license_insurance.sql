@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `license_insurance` (
+  `id` INTEGER NOT NULL auto_increment,
+  `moto_id` INTEGER NOT NULL,
+  `user_id` INTEGER NOT NULL,
+  `tipo` ENUM('Patente', 'Seguro', 'VTV') NOT NULL,
+  `entidad` VARCHAR(255) NOT NULL,
+  `nro_documento` VARCHAR(255) NOT NULL,
+  `fecha_vencimiento` DATE NOT NULL,
+  `monto` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  `cobertura` VARCHAR(255),
+  `cuota` VARCHAR(255),
+  `pagado` TINYINT(1) NOT NULL DEFAULT 0,
+  `fecha_pago` DATE,
+  `observaciones` TEXT,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`moto_id`) REFERENCES `motos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;

@@ -62,7 +62,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:${BACKEND_PORT}
+      - VITE_API_URL=http://localhost:${BACKEND_PORT}/api
       # Hot-Reload para frontend también
       - CHOKIDAR_USEPOLLING=true
       - CHOKIDAR_INTERVAL=100

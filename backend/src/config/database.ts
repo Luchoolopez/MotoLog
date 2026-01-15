@@ -11,40 +11,55 @@ function requireEnv(key: string): string {
     return value;
 }
 
-const sequelize = new Sequelize(
-    process.env.DATABASE_URL as string,
-    {
-        dialect: "postgres",
-        logging: NODE_ENV === "development" ? console.log : false,
-        protocol: "postgres",
-        dialectOptions: {
-            ssl: {
-                require: true,
-                rejectUnauthorized: false,
-            },
-        },
-    }
-);
+let sequelize: Sequelize;
 
+const commonOptions: Options = {
+    dialect: 'mysql',
+    logging: NODE_ENV === 'development' ? console.log : false,
+    pool: {
+        max: 10,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+    },
+    dialectOptions: NODE_ENV === 'production' ? {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false
+        }
+    } : {}
+};
 
-//esta funcion permite que el mysql se configure primero antes que el back para evitar errores
+if (process.env.DATABASE_URL) {
+    sequelize = new Sequelize(process.env.DATABASE_URL, commonOptions);
+}
+else {
+    sequelize = new Sequelize(
+        requireEnv('DB_NAME'),
+        requireEnv('DB_USER'),
+        requireEnv('DB_PASSWORD'),
+        {
+            ...commonOptions,
+            host: requireEnv("DB_HOST"),
+            port: parseInt(process.env.DB_PORT || '3306'),
+        }
+    );
+}
+
 async function connectWithRetry(attempts = 5, delay = 3000) {
     for (let i = 1; i <= attempts; i++) {
         try {
             await sequelize.authenticate();
-            console.log("✅ DB conectada con Sequelize");
-            await sequelize.sync({ alter: true });
-            console.log("✅ Tablas sincronizadas");
+            console.log(`✅ DB conectada con Sequelize (${process.env.DATABASE_URL ? 'Modo URL' : 'Modo Variables'})`);
             return true;
         } catch (error) {
-            console.error(`❌ Intento ${i}/${attempts} - Error conectando a la DB`);
+            console.error(`❌ Error, Intento ${i}/${attempts} - Error conectando a la DB:`, error);
 
             if (i === attempts) {
                 console.error('⛔ No se pudo establecer conexión con la base de datos.');
                 throw error;
             }
 
-            // Espera antes del próximo intento
             await new Promise(resolve => setTimeout(resolve, delay));
         }
     }

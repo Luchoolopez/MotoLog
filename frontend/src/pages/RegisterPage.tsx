@@ -17,7 +17,26 @@ const RegisterPage: React.FC = () => {
       await register(formData);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al registrarse');
+      console.error(err);
+      let errorMessage = 'Error al registrarse';
+
+      if (err.response?.data?.error) {
+        const backendError = err.response.data.error;
+        try {
+          // Intentar parsear si es un error de Zod (array simplificado)
+          const parsed = JSON.parse(backendError);
+          if (Array.isArray(parsed)) {
+            // Unir los mensajes de error
+            errorMessage = parsed.map((e: any) => `• ${e.message}`).join('\n');
+          } else {
+            errorMessage = backendError;
+          }
+        } catch {
+          // Si no es JSON, usar el texto tal cual
+          errorMessage = backendError;
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -36,7 +55,11 @@ const RegisterPage: React.FC = () => {
               <h3>Registrarse</h3>
             </div>
             <div className="card-body">
-              {error && <div className="alert alert-danger">{error}</div>}
+              {error && (
+                <div className="alert alert-danger" style={{ whiteSpace: 'pre-line' }}>
+                  {error}
+                </div>
+              )}
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="name" className="form-label">Nombre</label>

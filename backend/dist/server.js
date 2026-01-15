@@ -5,22 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __importDefault(require("./config/config"));
 const database_1 = require("./config/database");
+const associations_1 = require("./models/associations");
 const app_1 = require("./app");
-async function startServer() {
-    const app = (0, app_1.makeApp)();
+const app = (0, app_1.makeApp)();
+app.listen(config_1.default.port, async () => {
+    console.log(`Servidor corriendo en el puerto: ${config_1.default.port}`);
     try {
-        console.log('🔄 Conectando a la base de datos...');
-        await (0, database_1.connectWithRetry)(10, 5000); // 10 intentos, 5 segundos entre cada uno
-        console.log('✅ Base de datos conectada correctamente');
-        // Iniciar servidor después de conectar a la DB
-        app.listen(config_1.default.port, () => {
-            console.log(`🚀 Servidor corriendo en el puerto: ${config_1.default.port}`);
-        });
+        await (0, database_1.connectWithRetry)();
+        (0, associations_1.setupAssociations)();
+        await database_1.sequelize.sync({ alter: true });
     }
     catch (error) {
-        console.error('❌ Error fatal al conectar con la base de datos:', error);
-        process.exit(1);
+        console.error('Error conectando a la DB: ', error);
     }
-}
-startServer();
-//# sourceMappingURL=server.js.map
+});

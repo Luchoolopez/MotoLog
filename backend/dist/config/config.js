@@ -10,4 +10,3 @@ const config = {
     nodeEnv: process.env.NODE_ENV || 'development'
 };
 exports.default = config;
-//# sourceMappingURL=config.js.map

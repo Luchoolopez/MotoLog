@@ -1,55 +1,31 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.router = void 0;
-//con este archivo no hace falta exportar cada ruta individualmente al server.ts
-const express_1 = require("express");
-const fs_1 = require("fs");
-const PATH_ROUTER = `${__dirname}`;
-const router = (0, express_1.Router)();
-exports.router = router;
-const cleanFileName = (fileName) => {
-    const file = fileName.split('.').shift();
-    return file;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(0, fs_1.readdirSync)(PATH_ROUTER).filter((fileName) => {
-    const cleanName = cleanFileName(fileName);
-    if (cleanName !== 'index') {
-        Promise.resolve(`${`./${cleanName}`}`).then(s => __importStar(require(s))).then((moduleRouter) => {
-            router.use(`/${cleanName}`, moduleRouter.Router);
-        });
-    }
-});
-//# sourceMappingURL=index.js.map
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = __importDefault(require("./auth"));
+const moto_1 = __importDefault(require("./moto"));
+const plan_1 = __importDefault(require("./plan"));
+const item_1 = __importDefault(require("./item"));
+const history_1 = __importDefault(require("./history"));
+const calculator_1 = __importDefault(require("./calculator"));
+const odometerHistory_routes_1 = __importDefault(require("./odometerHistory.routes"));
+const fuel_1 = __importDefault(require("./fuel"));
+const warehouse_1 = __importDefault(require("./warehouse"));
+const license_insurance_1 = __importDefault(require("./license_insurance"));
+const fine_1 = __importDefault(require("./fine"));
+const router = (0, express_1.Router)();
+router.use('/auth', auth_1.default);
+router.use('/motos', moto_1.default);
+router.use('/planes', plan_1.default);
+router.use('/items', item_1.default);
+router.use('/historial', history_1.default);
+router.use('/status', calculator_1.default);
+router.use('/odometer-history', odometerHistory_routes_1.default);
+router.use('/fuel', fuel_1.default);
+router.use('/warehouse', warehouse_1.default);
+console.log('[DEBUG] Registering /docs route');
+router.use('/docs', license_insurance_1.default);
+router.use('/fines', fine_1.default);
+exports.default = router;

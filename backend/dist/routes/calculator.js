@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Router = void 0;
+const express_1 = require("express");
+const maintenanceCalculator_controller_1 = require("../controllers/maintenanceCalculator.controller");
+const calculatorRouter = (0, express_1.Router)();
+exports.Router = calculatorRouter;
+const calculatorController = new maintenanceCalculator_controller_1.MaintenanceCalculatorController();
+calculatorRouter.get('/:id', calculatorController.calculateStatus);
+exports.default = calculatorRouter;

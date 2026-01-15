@@ -4,7 +4,7 @@ exports.sequelize = void 0;
 exports.connectWithRetry = connectWithRetry;
 require("dotenv/config");
 const sequelize_1 = require("sequelize");
-const NODE_ENV = process.env.NODE_ENV;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 function requireEnv(key) {
     const value = process.env[key];
     if (!value) {
@@ -12,16 +12,15 @@ function requireEnv(key) {
     }
     return value;
 }
-const sequelize = new sequelize_1.Sequelize(requireEnv("DB_NAME"), requireEnv("DB_USER"), requireEnv("DB_PASSWORD"), {
-    host: requireEnv("DB_HOST"),
-    port: parseInt(process.env.DB_PORT || "3306"),
-    dialect: "mysql",
+const sequelize = new sequelize_1.Sequelize(process.env.DATABASE_URL, {
+    dialect: "postgres",
     logging: NODE_ENV === "development" ? console.log : false,
-    pool: {
-        max: 10,
-        min: 0,
-        acquire: 30000,
-        idle: 10000,
+    protocol: "postgres",
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false,
+        },
     },
 });
 exports.sequelize = sequelize;
@@ -31,11 +30,14 @@ async function connectWithRetry(attempts = 5, delay = 3000) {
         try {
             await sequelize.authenticate();
             console.log("✅ DB conectada con Sequelize");
+            await sequelize.sync({ alter: true });
+            console.log("✅ Tablas sincronizadas");
             return true;
         }
         catch (error) {
             console.error(`❌ Intento ${i}/${attempts} - Error conectando a la DB`);
             if (i === attempts) {
+                console.error('⛔ No se pudo establecer conexión con la base de datos.');
                 throw error;
             }
             // Espera antes del próximo intento
@@ -43,4 +45,3 @@ async function connectWithRetry(attempts = 5, delay = 3000) {
         }
     }
 }
-//# sourceMappingURL=database.js.map

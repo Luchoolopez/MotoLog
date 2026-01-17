@@ -14,7 +14,7 @@ export class MaintenanceHistoryController {
             const data = { ...req.body };
             if (data.km_realizado !== undefined) data.km_realizado = Number(data.km_realizado);
             if (data.moto_id !== undefined) data.moto_id = Number(data.moto_id);
-            if (data.item_plan_id !== undefined) data.item_plan_id = Number(data.item_plan_id);
+            if (data.item_plan_id !== undefined && data.item_plan_id !== null) data.item_plan_id = Number(data.item_plan_id);
 
             // También limpiar items consumidos si existen
             if (data.consumed_items && Array.isArray(data.consumed_items)) {

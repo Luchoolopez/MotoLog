@@ -35,9 +35,7 @@ export const GaragePage = () => {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1 className="mb-0" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>Mi Garage</h1>
                     <div>
-                        <Link to="/planes" className="btn btn-outline-secondary me-2" title="Configurar Planes">
-                            Planes
-                        </Link>
+
                         <button
                             className="btn p-0 border-0"
                             onClick={() => setShowModal(true)}

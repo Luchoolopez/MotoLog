@@ -71,25 +71,39 @@ const WarehousePage = () => {
         }
     };
 
-    // --- Grouping Logic ---
-    const groupedItems = items.reduce((acc, item) => {
-        if (filter !== 'All' && item.categoria !== filter) return acc;
+    const [selectedModel, setSelectedModel] = useState<string>('All');
 
+    // Get unique models
+    const uniqueModels = Array.from(new Set(items.map(item => item.modelo_moto || 'Compatible con todas'))).sort();
+
+    // --- Unified Filtering Logic ---
+    const filteredItemsRaw = items.filter(item => {
+        // Category Filter
+        if (filter !== 'All' && item.categoria !== filter) return false;
+
+        // Model Filter
+        const itemModel = item.modelo_moto || 'Compatible con todas';
+        if (selectedModel !== 'All' && itemModel !== selectedModel) return false;
+
+        // Search Filter
         const searchUpper = searchTerm.toUpperCase();
         const itemNombre = item.nombre.toUpperCase();
         const itemParte = (item.nro_parte || '').toUpperCase();
-
         if (searchTerm && !itemNombre.includes(searchUpper) && !itemParte.includes(searchUpper)) {
-            return acc;
+            return false;
         }
 
-        // --- Date Filter ---
+        // Date Filter
         if (dateFrom || dateTo) {
             const itemDate = new Date(item.fecha_compra).toISOString().split('T')[0];
-            if (dateFrom && itemDate < dateFrom) return acc;
-            if (dateTo && itemDate > dateTo) return acc;
+            if (dateFrom && itemDate < dateFrom) return false;
+            if (dateTo && itemDate > dateTo) return false;
         }
 
+        return true;
+    });
+
+    const groupedItems = filteredItemsRaw.reduce((acc, item) => {
         const key = `${item.nombre.toLowerCase()}_${(item.nro_parte || '').toLowerCase()}`;
         if (!acc[key]) {
             acc[key] = {
@@ -114,23 +128,7 @@ const WarehousePage = () => {
         return latestB - latestA;
     });
 
-    const totalInversion = items.reduce((acc, item) => {
-        // Apply the same filters to the total investment
-        if (filter !== 'All' && item.categoria !== filter) return acc;
-
-        const searchUpper = searchTerm.toUpperCase();
-        if (searchTerm && !item.nombre.toUpperCase().includes(searchUpper) && !(item.nro_parte || '').toUpperCase().includes(searchUpper)) {
-            return acc;
-        }
-
-        if (dateFrom || dateTo) {
-            const itemDate = new Date(item.fecha_compra).toISOString().split('T')[0];
-            if (dateFrom && itemDate < dateFrom) return acc;
-            if (dateTo && itemDate > dateTo) return acc;
-        }
-
-        return acc + (item.precio_compra * item.cantidad);
-    }, 0);
+    const totalInversion = filteredItemsRaw.reduce((acc, item) => acc + (item.precio_compra * item.cantidad), 0);
 
     const handleExportCSV = () => {
         if (!groups.length) return;
@@ -259,6 +257,22 @@ const WarehousePage = () => {
                                     </div>
                                 </div>
                                 <div className="row g-3 mt-1 align-items-center">
+                                    <div className="col-12 col-md-auto">
+                                        <div className="input-group input-group-sm">
+                                            <span className="input-group-text bg-transparent text-white border-secondary">🏍️ Modelo</span>
+                                            <select
+                                                className="form-select bg-dark text-white border-secondary shadow-none"
+                                                value={selectedModel}
+                                                onChange={(e) => setSelectedModel(e.target.value)}
+                                                style={{ maxWidth: '200px' }}
+                                            >
+                                                <option value="All">Todos</option>
+                                                {uniqueModels.map(model => (
+                                                    <option key={model} value={model}>{model}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div className="col-12 col-md-auto">
                                         <small className="text-white-50 me-2">Filtrar por Fecha:</small>
                                     </div>

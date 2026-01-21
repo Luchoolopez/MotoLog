@@ -77,7 +77,9 @@ export const ItemUsageHistoryModal = ({ show, onClose, itemId, itemName }: Props
                                     <tbody>
                                         {history.map((record, idx) => (
                                             <tr key={`${record.type}-${record.id}-${idx}`}>
-                                                <td className="ps-3 text-nowrap">{new Date(record.date).toLocaleDateString()}</td>
+                                                <td className="ps-3 text-nowrap">
+                                                    {new Date(record.date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
+                                                </td>
                                                 <td className="d-none d-md-table-cell">
                                                     <span className={`badge ${record.type === 'PURCHASE' ? 'bg-success' : 'bg-danger'}`}>
                                                         {record.type === 'PURCHASE' ? 'ENTRADA' : 'SALIDA'}

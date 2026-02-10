@@ -7,9 +7,19 @@ export class AuthController {
     static async register(req: Request, res: Response) {
         try {
             const validatedData = createUserSchema.parse(req.body);
-            const user = await AuthService.register(validatedData.name, validatedData.email, validatedData.password);
-            res.status(201).json({ message: 'User created successfully', user: { id: user.id, name: user.name, email: user.email } });
+            const { user, token } = await AuthService.register(validatedData.name, validatedData.email, validatedData.password);
+            res.status(201).json({ message: 'User created successfully', user: { id: user.id, name: user.name, email: user.email }, token });
         } catch (error: any) {
+            if (error?.name === 'ZodError' && Array.isArray(error?.errors)) {
+                res.status(400).json({ error: JSON.stringify(error.errors) });
+                return;
+            }
+
+            if (error?.name === 'SequelizeUniqueConstraintError') {
+                res.status(409).json({ error: 'Email already registered' });
+                return;
+            }
+
             res.status(400).json({ error: error.message });
         }
     }

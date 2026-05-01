@@ -17,7 +17,7 @@ export const useMotos = () => {
             setMotos(data);
             setError(null);
         } catch (error: any) {
-            console.error(error);
+            console.error('Error in fetchMotos:', error.response?.data || error);
             setError('No se pudo cargar el Garage');
         } finally {
             setLoading(false);
@@ -56,7 +56,8 @@ export const useMotos = () => {
 
             return true;
         } catch (error: any) {
-            console.error(error);
+            console.error('Error in addMoto:', error.response?.data || error);
+            console.log('Mensaje del servidor:', error.response?.data?.message);
             const msg = error.response?.data?.error || error.response?.data?.message || error.message;
             showToast('Error al crear moto: ' + msg, 'error');
             return false;

@@ -90,7 +90,8 @@ const FinesPage = () => {
             fetchData(); // Reload
             resetForm();
         } catch (error: any) {
-            console.error(error);
+            console.error('Error al guardar:', error.response?.data || error);
+            console.log('Mensaje del servidor:', error.response?.data?.message);
             const msg = error.response?.data?.message || error.response?.data?.error || 'Error al guardar';
             showToast(`Error: ${msg}`, 'error');
         }

@@ -77,4 +77,7 @@ LicenseInsurance.init({
     sequelize,
     modelName: 'LicenseInsurance',
     tableName: 'license_insurance',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
 });

@@ -52,8 +52,9 @@ export const MotoDashboard = () => {
             setMoto(motoData);
             setStatuses(statusData);
             setAverageConsumption(fuelData.averageConsumption);
-        } catch (error) {
-            console.error("Error cargando dashboard", error);
+        } catch (error: any) {
+            console.error("Error cargando dashboard:", error.response?.data || error);
+            console.log("Detalle del error:", error.response?.data?.message);
         } finally {
             setLoading(false);
         }
@@ -69,7 +70,8 @@ export const MotoDashboard = () => {
             showToast('Servicio registrado con éxito', 'success');
             return true;
         } catch (error: any) {
-            console.error(error);
+            console.error('Error al registrar servicio:', error.response?.data || error);
+            console.log('Mensaje del servidor:', error.response?.data?.message);
             const msg = error.response?.data?.message || error.message;
             showToast('Error al registrar servicio: ' + msg, 'error');
             return false;

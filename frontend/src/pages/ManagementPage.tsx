@@ -78,7 +78,10 @@ export const ManagementPage = () => {
                                     transition: 'transform 0.2s',
                                     opacity: option.disabled ? 0.7 : 1
                                 }}
-                                onClick={option.disabled ? undefined : option.action}
+                                onClick={() => {
+                                    console.log('Botón clickeado:', option.title);
+                                    if (!option.disabled) option.action();
+                                }}
                                 onMouseOver={(e: React.MouseEvent<HTMLElement>) => !option.disabled && (e.currentTarget.style.transform = 'translateY(-5px)')}
                                 onMouseOut={(e: React.MouseEvent<HTMLElement>) => !option.disabled && (e.currentTarget.style.transform = 'translateY(0)')}
                             >

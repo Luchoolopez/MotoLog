@@ -20,8 +20,9 @@ export interface MaintenanceStatus {
 }
 
 export class MaintenanceCalculatorService {
-    async calculateStatus(motoId: number): Promise<MaintenanceStatus[]> {
-        const motoRaw = await Motorcycle.findByPk(motoId, {
+    async calculateStatus(motoId: number, userId: number): Promise<MaintenanceStatus[]> {
+        const motoRaw = await Motorcycle.findOne({
+            where: { id: motoId, user_id: userId },
             include: [
                 {
                     model: MaintenancePlan,

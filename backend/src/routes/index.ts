@@ -10,6 +10,7 @@ import FuelRoutes from "./fuel";
 import warehouseRoutes from './warehouse';
 import LicenseInsuranceRoutes from './license_insurance';
 import FineRoutes from './fine';
+import AlertReminderRoutes from './alertReminder';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/warehouse', warehouseRoutes);
 console.log('[DEBUG] Registering /docs route');
 router.use('/docs', LicenseInsuranceRoutes);
 router.use('/fines', FineRoutes);
+router.use('/alert-reminders', AlertReminderRoutes);
 
 export default router;

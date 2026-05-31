@@ -4,7 +4,7 @@ import { sequelize } from '../config/database';
 export class Fine extends Model {
     public id!: number;
     public moto_id!: number;
-    public type!: 'Multa' | 'Tramite' | 'Otro';
+    public type!: 'Multa' | 'Service' | 'Otro';
     public description!: string;
     public amount!: number;
     public date!: string; // Fecha del incidente o vencimiento
@@ -53,4 +53,7 @@ Fine.init({
     sequelize,
     modelName: 'Fine',
     tableName: 'fines',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
 });

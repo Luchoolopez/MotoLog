@@ -8,7 +8,7 @@ import { createMaintenanceHistoryType, updateMaintenanceHistoryType } from "../v
 
 export class MaintenanceHistoryService {
 
-    async create(data: any) {
+    async create(data: any, userId: number) {
         const t = await sequelize.transaction();
         try {
             console.log("--- INICIANDO REGISTRO DE MANTENIMIENTO ---");
@@ -19,6 +19,8 @@ export class MaintenanceHistoryService {
             if (!historyData.moto_id || (!historyData.item_plan_id && !historyData.tarea_ad_hoc)) {
                 throw new Error('Faltan campos obligatorios: moto_id y (item_plan_id o tarea_ad_hoc)');
             }
+
+            await this.ensureMotoBelongsToUser(Number(historyData.moto_id), userId);
 
             // 1. Crear el registro de historial
             const newRecord = await MaintenanceHistory.create(historyData as any, { transaction: t });
@@ -42,7 +44,10 @@ export class MaintenanceHistoryService {
                     const cantidad = Number(cantidadUsada);
 
                     console.log(`--- [ITEM ID: ${warehouseItemId}] ---`);
-                    const warehouseItem = await WarehouseItem.findByPk(warehouseItemId, { transaction: t });
+                    const warehouseItem = await WarehouseItem.findOne({
+                        where: { id: warehouseItemId, user_id: userId },
+                        transaction: t
+                    });
 
                     if (!warehouseItem) {
                         console.error(`❌ ERROR: Ítem de almacén ID ${warehouseItemId} NO ENCONTRADO.`);
@@ -72,7 +77,10 @@ export class MaintenanceHistoryService {
             const motoId = Number(data.moto_id);
             const kmRealizado = Number(data.km_realizado);
 
-            const moto = await Motorcycle.findByPk(motoId, { transaction: t });
+            const moto = await Motorcycle.findOne({
+                where: { id: motoId, user_id: userId },
+                transaction: t
+            });
             if (moto && kmRealizado > Number(moto.km_actual)) {
                 console.log(`Actualizando KM moto ${moto.id}: ${moto.km_actual} -> ${kmRealizado}`);
                 await moto.update({ km_actual: kmRealizado }, { transaction: t });
@@ -101,7 +109,9 @@ export class MaintenanceHistoryService {
         }
     }
 
-    async getHistoryByMotoId(motoId: number) {
+    async getHistoryByMotoId(motoId: number, userId: number) {
+        await this.ensureMotoBelongsToUser(motoId, userId);
+
         return await MaintenanceHistory.findAll({
             where: { moto_id: motoId },
             include: [
@@ -115,23 +125,37 @@ export class MaintenanceHistoryService {
         });
     }
 
-    async getById(id: number) {
-        const record = await MaintenanceHistory.findByPk(id);
+    async getById(id: number, userId: number) {
+        const record = await MaintenanceHistory.findOne({
+            where: { id },
+            include: [{
+                model: Motorcycle,
+                as: 'moto',
+                where: { user_id: userId },
+                attributes: ['id']
+            }]
+        });
         if (!record) {
             throw new Error('Registro de historial no encontrado');
         }
         return record;
     }
 
-    async update(id: number, data: updateMaintenanceHistoryType) {
-        const record = await this.getById(id);
+    async update(id: number, data: updateMaintenanceHistoryType, userId: number) {
+        const record = await this.getById(id, userId);
         await record.update(data as any);
         return record;
     }
 
-    async delete(id: number) {
-        const record = await this.getById(id);
+    async delete(id: number, userId: number) {
+        const record = await this.getById(id, userId);
         await record.destroy();
         return { message: 'Registro eliminado correctamente' };
+    }
+
+    private async ensureMotoBelongsToUser(motoId: number, userId: number) {
+        const moto = await Motorcycle.findOne({ where: { id: motoId, user_id: userId } });
+        if (!moto) throw new Error('Moto no encontrada o no pertenece al usuario');
+        return moto;
     }
 }

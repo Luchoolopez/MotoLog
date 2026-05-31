@@ -5,6 +5,7 @@ import { FuelService } from '../../../services/fuel.service';
 import { LicenseInsuranceService } from '../../../services/licenseInsurance.service';
 import { WarehouseService } from '../../../services/warehouse.service';
 import { FineService } from '../../../services/fine.service';
+import { OdometerHistoryService } from '../../../services/odometerHistory.service';
 import type { Motorcycle } from '../../../types/moto.types';
 
 interface FinancialReportModalProps {
@@ -32,6 +33,7 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
     // Results
     const [totalCost, setTotalCost] = useState<number | null>(null);
     const [breakdown, setBreakdown] = useState({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0, fines: 0 });
+    const [metrics, setMetrics] = useState({ monthlyAverage: 0, costPerKm: 0, kmAnalyzed: 0, monthsAnalyzed: 1 });
 
     useEffect(() => {
         if (show) {
@@ -55,6 +57,7 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
     const resetResults = () => {
         setTotalCost(null);
         setBreakdown({ fuel: 0, insurance: 0, patente: 0, vtv: 0, warehouse: 0, fines: 0 });
+        setMetrics({ monthlyAverage: 0, costPerKm: 0, kmAnalyzed: 0, monthsAnalyzed: 1 });
     };
 
     const handleCalculate = async () => {
@@ -67,6 +70,8 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
         let vtvTotal = 0;
         let warehouseTotal = 0;
         let finesTotal = 0;
+        let allFuelRecords: any[] = [];
+        const reportDates: Date[] = [];
 
         try {
             // 1. Calculate Fuel
@@ -82,7 +87,10 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                     const res = await FuelService.getByMotoId(selectedMotoId);
                     if (res && res.history) fuelRecords = res.history;
                 }
-                fuelTotal = filterAndSum(fuelRecords, 'total', 'fecha');
+                allFuelRecords = fuelRecords;
+                const filteredFuel = filterByDate(fuelRecords, 'fecha');
+                reportDates.push(...getDatesFromItems(filteredFuel, 'fecha'));
+                fuelTotal = sumBy(filteredFuel, 'total');
             }
 
             // 2. Fetch Docs (Insurance & Patente & VTV)
@@ -95,15 +103,21 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
 
             if (includeInsurance) {
                 const insDocs = docs.filter(d => d.tipo === 'Seguro' && d.pagado);
-                insuranceTotal = filterAndSum(insDocs, 'monto', 'fecha_pago');
+                const filtered = filterByDate(insDocs, 'fecha_pago');
+                reportDates.push(...getDatesFromItems(filtered, 'fecha_pago'));
+                insuranceTotal = sumBy(filtered, 'monto');
             }
             if (includePatente) {
                 const patDocs = docs.filter(d => d.tipo === 'Patente' && d.pagado);
-                patenteTotal = filterAndSum(patDocs, 'monto', 'fecha_pago');
+                const filtered = filterByDate(patDocs, 'fecha_pago');
+                reportDates.push(...getDatesFromItems(filtered, 'fecha_pago'));
+                patenteTotal = sumBy(filtered, 'monto');
             }
             if (includeVTV) {
                 const vtvDocs = docs.filter(d => d.tipo === 'VTV' && d.pagado);
-                vtvTotal = filterAndSum(vtvDocs, 'monto', 'fecha_pago');
+                const filtered = filterByDate(vtvDocs, 'fecha_pago');
+                reportDates.push(...getDatesFromItems(filtered, 'fecha_pago'));
+                vtvTotal = sumBy(filtered, 'monto');
             }
 
             // 3. Warehouse
@@ -117,6 +131,7 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                 }
                 // Custom sum logic for warehouse (price * qty)
                 warehouseItems = filterByDate(warehouseItems, 'fecha_compra');
+                reportDates.push(...getDatesFromItems(warehouseItems, 'fecha_compra'));
                 warehouseTotal = warehouseItems.reduce((sum, item) => sum + (Number(item.precio_compra) * Number(item.cantidad)), 0);
             }
 
@@ -143,11 +158,23 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                 // Let's Include EVERYTHING for now, or maybe just non-anulated?
                 // Let's include everything except 'Anulado'.
                 fineRecords = fineRecords.filter(r => r.status !== 'Anulado');
-                finesTotal = filterAndSum(fineRecords, 'amount', 'date');
+                const filtered = filterByDate(fineRecords, 'date');
+                reportDates.push(...getDatesFromItems(filtered, 'date'));
+                finesTotal = sumBy(filtered, 'amount');
             }
 
+            const nextTotal = fuelTotal + insuranceTotal + patenteTotal + vtvTotal + warehouseTotal + finesTotal;
+            const monthsAnalyzed = calculateMonthsAnalyzed(reportDates);
+            const kmAnalyzed = await calculateKmAnalyzed(allFuelRecords);
+
             setBreakdown({ fuel: fuelTotal, insurance: insuranceTotal, patente: patenteTotal, vtv: vtvTotal, warehouse: warehouseTotal, fines: finesTotal });
-            setTotalCost(fuelTotal + insuranceTotal + patenteTotal + vtvTotal + warehouseTotal + finesTotal);
+            setTotalCost(nextTotal);
+            setMetrics({
+                monthlyAverage: nextTotal / monthsAnalyzed,
+                costPerKm: kmAnalyzed > 0 ? nextTotal / kmAnalyzed : 0,
+                kmAnalyzed,
+                monthsAnalyzed
+            });
 
         } catch (error) {
             console.error("Error calculating expenses", error);
@@ -179,9 +206,74 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
         });
     }
 
-    const filterAndSum = (items: any[], amountField: string, dateField: string) => {
-        const filtered = filterByDate(items, dateField);
-        return filtered.reduce((sum, item) => sum + Number(item[amountField] || 0), 0);
+    const sumBy = (items: any[], amountField: string) => {
+        return items.reduce((sum, item) => sum + Number(item[amountField] || 0), 0);
+    }
+
+    const getDatesFromItems = (items: any[], dateField: string) => {
+        return items
+            .filter(item => item[dateField])
+            .map(item => new Date(item[dateField]))
+            .filter(date => !Number.isNaN(date.getTime()));
+    }
+
+    const calculateMonthsAnalyzed = (dates: Date[]) => {
+        const start = startDate ? new Date(startDate) : (dates.length ? new Date(Math.min(...dates.map(d => d.getTime()))) : new Date());
+        const end = endDate ? new Date(endDate) : (dates.length ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date());
+
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+        return Math.max(1, days / 30.4375);
+    }
+
+    const calculateKmAnalyzed = async (fuelRecords: any[]) => {
+        const motosToAnalyze = selectedMotoId === 0 ? motos : motos.filter(m => m.id === selectedMotoId);
+
+        const kmFromOdometer = await Promise.all(motosToAnalyze.map(async (moto) => {
+            try {
+                const history = await OdometerHistoryService.getByMotoId(moto.id);
+                const filtered = filterByDate(history, 'fecha')
+                    .map(record => Number(record.km))
+                    .filter(km => Number.isFinite(km));
+
+                if (filtered.length < 2) return 0;
+                return Math.max(...filtered) - Math.min(...filtered);
+            } catch (error) {
+                console.warn('No se pudo calcular km por odometro', error);
+                return 0;
+            }
+        }));
+
+        const totalFromOdometer = kmFromOdometer.reduce((sum, km) => sum + km, 0);
+        if (totalFromOdometer > 0) return totalFromOdometer;
+
+        const groupedFuel = filterByDate(fuelRecords, 'fecha').reduce((acc: Record<number, number[]>, record) => {
+            const motoId = Number(record.moto_id);
+            if (!acc[motoId]) acc[motoId] = [];
+            acc[motoId].push(Number(record.km_momento));
+            return acc;
+        }, {});
+
+        return Object.values(groupedFuel).reduce((sum, kms) => {
+            const validKms = kms.filter(km => Number.isFinite(km));
+            if (validKms.length < 2) return sum;
+            return sum + Math.max(...validKms) - Math.min(...validKms);
+        }, 0);
+    }
+
+    const getTopCategory = () => {
+        const categories = [
+            { label: 'Combustible', amount: breakdown.fuel },
+            { label: 'Seguro', amount: breakdown.insurance },
+            { label: 'Patente', amount: breakdown.patente },
+            { label: 'VTV', amount: breakdown.vtv },
+            { label: 'Almacen', amount: breakdown.warehouse },
+            { label: 'Multas y Sv', amount: breakdown.fines }
+        ];
+
+        return categories.sort((a, b) => b.amount - a.amount)[0] || { label: '-', amount: 0 };
     }
 
     return (
@@ -321,6 +413,46 @@ export const FinancialReportModal: React.FC<FinancialReportModalProps> = ({ show
                                 ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </h1>
                         </div>
+
+                        <Row className="g-3 mb-4">
+                            <Col md={4}>
+                                <Card className="bg-dark border border-success h-100 shadow-sm">
+                                    <Card.Body className="text-center">
+                                        <small className="text-success fw-bold text-uppercase d-block mb-2">Promedio Mensual</small>
+                                        <h3 className="fw-bold text-white mb-1">
+                                            ${metrics.monthlyAverage.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                                        </h3>
+                                        <small className="text-white-50">{metrics.monthsAnalyzed.toFixed(1)} meses analizados</small>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col md={4}>
+                                <Card className="bg-dark border border-info h-100 shadow-sm">
+                                    <Card.Body className="text-center">
+                                        <small className="text-info fw-bold text-uppercase d-block mb-2">Costo por KM</small>
+                                        <h3 className="fw-bold text-white mb-1">
+                                            {metrics.kmAnalyzed > 0
+                                                ? `$${metrics.costPerKm.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                : '-'}
+                                        </h3>
+                                        <small className="text-white-50">
+                                            {metrics.kmAnalyzed > 0 ? `${metrics.kmAnalyzed.toLocaleString('es-AR')} km registrados` : 'Sin km suficientes'}
+                                        </small>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col md={4}>
+                                <Card className="bg-dark border border-warning h-100 shadow-sm">
+                                    <Card.Body className="text-center">
+                                        <small className="text-warning fw-bold text-uppercase d-block mb-2">Mayor Rubro</small>
+                                        <h3 className="fw-bold text-white mb-1">{getTopCategory().label}</h3>
+                                        <small className="text-white-50">
+                                            ${getTopCategory().amount.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                                        </small>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
 
                         <Row className="g-2 justify-content-center">
                             {/* Ordered compact cards */}

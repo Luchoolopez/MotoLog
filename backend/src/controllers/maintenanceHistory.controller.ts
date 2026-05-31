@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import { MaintenanceHistoryService } from "../services/maintenanceHistory.service";
 
 export class MaintenanceHistoryController {
@@ -8,7 +9,7 @@ export class MaintenanceHistoryController {
         this.historyService = new MaintenanceHistoryService();
     }
 
-    createHistory = async (req: Request, res: Response) => {
+    createHistory = async (req: AuthRequest, res: Response) => {
         try {
             // Asegurar que valores numéricos lo sean
             const data = { ...req.body };
@@ -24,7 +25,7 @@ export class MaintenanceHistoryController {
                 }));
             }
 
-            const record = await this.historyService.create(data);
+            const record = await this.historyService.create(data, req.user!.id);
             return res.status(201).json({
                 success: true,
                 message: 'Mantenimiento registrado correctamente',
@@ -41,7 +42,7 @@ export class MaintenanceHistoryController {
         }
     }
 
-    getByMotoId = async (req: Request, res: Response) => {
+    getByMotoId = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
 
@@ -49,7 +50,7 @@ export class MaintenanceHistoryController {
                 return res.status(400).json({ success: false, message: 'ID de moto inválido' });
             }
 
-            const history = await this.historyService.getHistoryByMotoId(Number(id));
+            const history = await this.historyService.getHistoryByMotoId(Number(id), req.user!.id);
 
             return res.status(200).json({
                 success: true,
@@ -66,7 +67,7 @@ export class MaintenanceHistoryController {
         }
     }
 
-    updateHistory = async (req: Request, res: Response) => {
+    updateHistory = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
 
@@ -74,7 +75,7 @@ export class MaintenanceHistoryController {
                 return res.status(400).json({ success: false, message: 'ID de registro inválido' });
             }
 
-            const updatedRecord = await this.historyService.update(Number(id), req.body);
+            const updatedRecord = await this.historyService.update(Number(id), req.body, req.user!.id);
 
             return res.status(200).json({
                 success: true,
@@ -90,7 +91,7 @@ export class MaintenanceHistoryController {
         }
     }
 
-    deleteHistory = async (req: Request, res: Response) => {
+    deleteHistory = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
 
@@ -98,7 +99,7 @@ export class MaintenanceHistoryController {
                 return res.status(400).json({ success: false, message: 'ID inválido' });
             }
 
-            const result = await this.historyService.delete(Number(id));
+            const result = await this.historyService.delete(Number(id), req.user!.id);
 
             return res.status(200).json({
                 success: true,

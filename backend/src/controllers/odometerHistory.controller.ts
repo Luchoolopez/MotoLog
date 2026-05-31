@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import { OdometerHistoryService } from "../services/odometerHistory.service";
 
 export class OdometerHistoryController {
@@ -8,7 +9,7 @@ export class OdometerHistoryController {
         this.service = new OdometerHistoryService();
     }
 
-    getHistoryByMotoId = async (req: Request, res: Response) => {
+    getHistoryByMotoId = async (req: AuthRequest, res: Response) => {
         try {
             const { motoId } = req.params;
             if (!motoId || isNaN(Number(motoId))) {
@@ -18,7 +19,7 @@ export class OdometerHistoryController {
                 });
             }
 
-            const history = await this.service.getByMotoId(Number(motoId));
+            const history = await this.service.getByMotoId(Number(motoId), req.user!.id);
             return res.status(200).json({
                 success: true,
                 message: 'Historial de odómetro encontrado',

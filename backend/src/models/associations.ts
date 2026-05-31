@@ -10,6 +10,7 @@ import { ItemPlanWarehouse } from "./item_plan_warehouse.model";
 import { MaintenanceHistoryConsumption } from "./maintenance_history_consumption.model";
 import { LicenseInsurance } from "./license_insurance.model";
 import { Fine } from "./fine.model";
+import { AlertReminder } from "./alert_reminder.model";
 
 
 export const setupAssociations = () => {
@@ -172,5 +173,15 @@ export const setupAssociations = () => {
     Fine.belongsTo(Motorcycle, {
         foreignKey: 'moto_id',
         as: 'moto'
+    });
+
+    // --- 14. User <-> AlertReminder ---
+    User.hasMany(AlertReminder, {
+        foreignKey: 'user_id',
+        as: 'alertas_pospuestas'
+    });
+    AlertReminder.belongsTo(User, {
+        foreignKey: 'user_id',
+        as: 'usuario'
     });
 };

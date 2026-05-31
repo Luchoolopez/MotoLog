@@ -1,8 +1,11 @@
 import { FuelRecord } from "../models/fuel_record.model";
+import { Motorcycle } from "../models/motorcycle.model";
 
 export class FuelService {
-    async create(data: any) {
+    async create(data: any, userId: number) {
         try {
+            await this.ensureMotoBelongsToUser(Number(data.moto_id), userId);
+
             // Autocalculate total if not provided
             if (!data.total) {
                 data.total = data.litros * data.precio_por_litro;
@@ -13,9 +16,9 @@ export class FuelService {
         }
     }
 
-    async update(id: number, data: any) {
+    async update(id: number, data: any, userId: number) {
         try {
-            const record = await FuelRecord.findByPk(id);
+            const record = await this.getRecordForUser(id, userId);
             if (!record) throw new Error('Registro no encontrado');
 
             if (!data.total && data.litros && data.precio_por_litro) {
@@ -28,9 +31,9 @@ export class FuelService {
         }
     }
 
-    async delete(id: number) {
+    async delete(id: number, userId: number) {
         try {
-            const record = await FuelRecord.findByPk(id);
+            const record = await this.getRecordForUser(id, userId);
             if (!record) throw new Error('Registro no encontrado');
             return await record.destroy();
         } catch (error) {
@@ -38,14 +41,18 @@ export class FuelService {
         }
     }
 
-    async getByMotoId(motoId: number) {
+    async getByMotoId(motoId: number, userId: number) {
+        await this.ensureMotoBelongsToUser(motoId, userId);
+
         return await FuelRecord.findAll({
             where: { moto_id: motoId },
             order: [['fecha', 'DESC']]
         });
     }
 
-    async calculateAverageConsumption(motoId: number) {
+    async calculateAverageConsumption(motoId: number, userId: number) {
+        await this.ensureMotoBelongsToUser(motoId, userId);
+
         const records = await FuelRecord.findAll({
             where: { moto_id: motoId },
             order: [['km_momento', 'ASC']]
@@ -81,5 +88,23 @@ export class FuelService {
             litersPerKm,
             litersPer100Km
         };
+    }
+
+    private async ensureMotoBelongsToUser(motoId: number, userId: number) {
+        const moto = await Motorcycle.findOne({ where: { id: motoId, user_id: userId } });
+        if (!moto) throw new Error('Moto no encontrada o no pertenece al usuario');
+        return moto;
+    }
+
+    private async getRecordForUser(id: number, userId: number) {
+        return await FuelRecord.findOne({
+            where: { id },
+            include: [{
+                model: Motorcycle,
+                as: 'moto',
+                where: { user_id: userId },
+                attributes: ['id']
+            }]
+        });
     }
 }

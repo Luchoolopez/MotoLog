@@ -15,6 +15,8 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
     const [loading, setLoading] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<FuelRecord | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [tripDistance, setTripDistance] = useState<number | ''>('');
+    const [estimatedPrice, setEstimatedPrice] = useState<number | ''>('');
 
     useEffect(() => {
         if (show && motoId) {
@@ -28,6 +30,8 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
             const data = await FuelService.getByMotoId(motoId);
             setHistory(data.history);
             setAvgConsumption(data.averageConsumption);
+            const latestRecord = data.history[0];
+            setEstimatedPrice(latestRecord ? Number(latestRecord.precio_por_litro) : '');
         } catch (error) {
             console.error('Error fetching fuel history:', error);
         } finally {
@@ -51,6 +55,14 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
         setSelectedRecord(record);
         setShowEditModal(true);
     };
+
+    const estimatedLiters = avgConsumption && avgConsumption.kmPerLiter > 0 && Number(tripDistance) > 0
+        ? Number(tripDistance) / avgConsumption.kmPerLiter
+        : 0;
+
+    const estimatedCost = estimatedLiters > 0 && Number(estimatedPrice) > 0
+        ? estimatedLiters * Number(estimatedPrice)
+        : 0;
 
     if (!show) return null;
 
@@ -113,6 +125,67 @@ export const FuelHistoryModal = ({ show, onClose, motoId, onSuccess }: Props) =>
                                                 <h4 className="mb-0">
                                                     ${history.reduce((acc, curr) => acc + Number(curr.total), 0).toLocaleString()}
                                                 </h4>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="card border-0 shadow-sm mt-3">
+                                        <div className="card-body">
+                                            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+                                                <div>
+                                                    <h6 className="mb-1 fw-bold">Calculadora de viaje</h6>
+                                                    <small className="text-muted">Estimacion basada en el consumo promedio registrado</small>
+                                                </div>
+                                                {(!avgConsumption || avgConsumption.kmPerLiter <= 0) && (
+                                                    <span className="badge bg-warning text-dark">Faltan cargas suficientes</span>
+                                                )}
+                                            </div>
+
+                                            <div className="row g-3 align-items-end">
+                                                <div className="col-md-4">
+                                                    <label className="form-label small text-muted">Distancia a recorrer</label>
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step="1"
+                                                            className="form-control"
+                                                            value={tripDistance}
+                                                            onChange={(e) => setTripDistance(e.target.value === '' ? '' : Number(e.target.value))}
+                                                            placeholder="Ej: 250"
+                                                        />
+                                                        <span className="input-group-text">km</span>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-4">
+                                                    <label className="form-label small text-muted">Precio por litro</label>
+                                                    <div className="input-group">
+                                                        <span className="input-group-text">$</span>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step="0.01"
+                                                            className="form-control"
+                                                            value={estimatedPrice}
+                                                            onChange={(e) => setEstimatedPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                                                            placeholder="Precio actual"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-4">
+                                                    <div className="rounded bg-dark text-white p-3 h-100">
+                                                        <div className="d-flex justify-content-between gap-2">
+                                                            <small className="text-white-50">Litros</small>
+                                                            <strong>{estimatedLiters > 0 ? `${estimatedLiters.toFixed(2)} L` : '--'}</strong>
+                                                        </div>
+                                                        <div className="d-flex justify-content-between gap-2 mt-2">
+                                                            <small className="text-white-50">Costo</small>
+                                                            <strong className="text-success">
+                                                                {estimatedCost > 0 ? `$${estimatedCost.toLocaleString('es-AR', { maximumFractionDigits: 0 })}` : '--'}
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import { FuelService } from "../services/fuel.service";
 
 export class FuelController {
@@ -8,9 +9,9 @@ export class FuelController {
         this.service = new FuelService();
     }
 
-    create = async (req: Request, res: Response) => {
+    create = async (req: AuthRequest, res: Response) => {
         try {
-            const record = await this.service.create(req.body);
+            const record = await this.service.create(req.body, req.user!.id);
             return res.status(201).json({
                 success: true,
                 message: 'Registro de combustible creado',
@@ -25,11 +26,11 @@ export class FuelController {
         }
     }
 
-    getHistoryByMotoId = async (req: Request, res: Response) => {
+    getHistoryByMotoId = async (req: AuthRequest, res: Response) => {
         try {
             const { motoId } = req.params;
-            const history = await this.service.getByMotoId(Number(motoId));
-            const averageConsumption = await this.service.calculateAverageConsumption(Number(motoId));
+            const history = await this.service.getByMotoId(Number(motoId), req.user!.id);
+            const averageConsumption = await this.service.calculateAverageConsumption(Number(motoId), req.user!.id);
 
             return res.status(200).json({
                 success: true,
@@ -47,10 +48,10 @@ export class FuelController {
         }
     }
 
-    update = async (req: Request, res: Response) => {
+    update = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const record = await this.service.update(Number(id), req.body);
+            const record = await this.service.update(Number(id), req.body, req.user!.id);
             return res.status(200).json({
                 success: true,
                 message: 'Registro de combustible actualizado',
@@ -65,10 +66,10 @@ export class FuelController {
         }
     }
 
-    delete = async (req: Request, res: Response) => {
+    delete = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
-            await this.service.delete(Number(id));
+            await this.service.delete(Number(id), req.user!.id);
             return res.status(200).json({
                 success: true,
                 message: 'Registro de combustible eliminado'

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useMotos } from '../hooks/useMoto';
 import { MotoFormModal } from '../components/modal/planes/MotoFormModal';
 import { useState } from 'react';
+import { DashboardAlerts } from '../components/DashboardAlerts';
 
 export const GaragePage = () => {
     const { motos, loading, error, removeMoto, addMoto } = useMotos();
@@ -59,6 +60,8 @@ export const GaragePage = () => {
                         </button>
                     </div>
                 </div>
+
+                <DashboardAlerts motos={motos} />
 
                 {motos.length === 0 ? (
                     <div className="text-center py-5 rounded shadow-sm" style={{ backgroundColor: 'transparent' }}>

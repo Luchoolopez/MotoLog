@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { WarehouseService, type CreateWarehouseItemDto, type WarehouseItem } from "../../../services/warehouse.service";
 import { useToast } from "../../../context/ToastContext";
+import { MotoService } from "../../../services/moto.service";
+import type { Motorcycle } from "../../../types/moto.types";
 
 interface Props {
     show: boolean;
@@ -24,7 +26,28 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
     });
 
     const [loading, setLoading] = useState(false);
+    const [motos, setMotos] = useState<Motorcycle[]>([]);
+    const [loadingMotos, setLoadingMotos] = useState(false);
     const { showToast } = useToast();
+
+    useEffect(() => {
+        if (!show) return;
+
+        const fetchMotos = async () => {
+            setLoadingMotos(true);
+            try {
+                const data = await MotoService.getAll();
+                setMotos(data);
+            } catch (error) {
+                console.error('Error cargando motos:', error);
+                showToast('No se pudieron cargar las motos del garage', 'error');
+            } finally {
+                setLoadingMotos(false);
+            }
+        };
+
+        fetchMotos();
+    }, [show]);
 
     useEffect(() => {
         if (show) {
@@ -196,13 +219,22 @@ export const WarehouseItemModal = ({ show, onClose, onSuccess, initialData, isRe
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label fw-bold">Modelo Moto</label>
-                                    <input
-                                        type="text" className="form-control"
+                                    <select
+                                        className="form-select"
                                         value={formData.modelo_moto}
-                                        onChange={e => setFormData({ ...formData, modelo_moto: e.target.value.toUpperCase() })}
-                                        placeholder="Ej: MT-03, FZ-25..."
+                                        onChange={e => setFormData({ ...formData, modelo_moto: e.target.value })}
                                         disabled={!!isRestock}
-                                    />
+                                    >
+                                        <option value="">{loadingMotos ? 'Cargando motos...' : 'Compatible con todas'}</option>
+                                        {motos.map(moto => {
+                                            const modelValue = `${moto.marca} ${moto.modelo}`.trim().toUpperCase();
+                                            return (
+                                                <option key={moto.id} value={modelValue}>
+                                                    {moto.marca} {moto.modelo} - {moto.patente}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
                                 </div>
 
                                 <div className="col-12">

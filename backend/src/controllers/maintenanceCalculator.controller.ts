@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import { MaintenanceCalculatorService } from "../services/maintenanceCalculator.service";
 
 export class MaintenanceCalculatorController {
@@ -7,7 +8,7 @@ export class MaintenanceCalculatorController {
         this.maintenanceCalculatorService = new MaintenanceCalculatorService();
     }
 
-    calculateStatus = async (req: Request, res: Response) => {
+    calculateStatus = async (req: AuthRequest, res: Response) => {
         try {
             const { id } = req.params;
             if (!id || isNaN(Number(id))) {
@@ -16,7 +17,7 @@ export class MaintenanceCalculatorController {
                     message:'ID no encontrado'
                 })
             }
-            const result = await this.maintenanceCalculatorService.calculateStatus(Number(id));
+            const result = await this.maintenanceCalculatorService.calculateStatus(Number(id), req.user!.id);
 
             return res.status(200).json({
                 success: true,

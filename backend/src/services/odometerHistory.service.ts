@@ -1,4 +1,5 @@
 import { OdometerHistory } from "../models/odometer_history.model";
+import { Motorcycle } from "../models/motorcycle.model";
 
 export class OdometerHistoryService {
 
@@ -13,7 +14,10 @@ export class OdometerHistoryService {
         }
     }
 
-    async getByMotoId(motoId: number) {
+    async getByMotoId(motoId: number, userId: number) {
+        const moto = await Motorcycle.findOne({ where: { id: motoId, user_id: userId } });
+        if (!moto) throw new Error('Moto no encontrada o no pertenece al usuario');
+
         return await OdometerHistory.findAll({
             where: { moto_id: motoId },
             order: [['fecha', 'DESC']]

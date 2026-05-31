@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Router = void 0;
+const express_1 = require("express");
+const maintenanceHistory_controller_1 = require("../controllers/maintenanceHistory.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const historyRouter = (0, express_1.Router)();
+exports.Router = historyRouter;
+const historyController = new maintenanceHistory_controller_1.MaintenanceHistoryController();
+historyRouter.use(auth_middleware_1.authMiddleware);
+historyRouter.post('/', historyController.createHistory);
+historyRouter.put('/:id', historyController.updateHistory);
+historyRouter.delete('/:id', historyController.deleteHistory);
+historyRouter.get('/moto/:id', historyController.getByMotoId);
+exports.default = historyRouter;

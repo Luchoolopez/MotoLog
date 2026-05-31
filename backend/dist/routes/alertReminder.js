@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const alertReminder_controller_1 = require("../controllers/alertReminder.controller");
+const router = (0, express_1.Router)();
+const controller = new alertReminder_controller_1.AlertReminderController();
+router.use(auth_middleware_1.authMiddleware);
+router.get("/", controller.getActive);
+router.post("/snooze", controller.snooze);
+router.delete("/", controller.clear);
+router.delete("/:alertKey", controller.clear);
+exports.default = router;

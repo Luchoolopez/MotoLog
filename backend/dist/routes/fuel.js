@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const fuel_controller_1 = require("../controllers/fuel.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+const controller = new fuel_controller_1.FuelController();
+router.use(auth_middleware_1.authMiddleware);
+router.post('/', controller.create);
+router.get('/moto/:motoId', controller.getHistoryByMotoId);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
+exports.default = router;
